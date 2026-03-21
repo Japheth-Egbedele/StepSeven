@@ -17,7 +17,7 @@ const ProgressSchema = new mongoose.Schema({
   step1: {
     targetAmount: {
       type: Number,
-      default: 100000,
+      default: 12500000,
       validate: {
         validator: Number.isInteger,
         message: 'Target amount must be an integer'

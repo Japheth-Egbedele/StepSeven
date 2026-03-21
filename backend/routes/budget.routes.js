@@ -5,6 +5,8 @@ const { checkAuth } = require('../middleware/auth');
 const { writeLimiter } = require('../middleware/rateLimiter');
 budgetRouter.use(checkAuth);
 
+budgetRouter.get('/summary/:year/:month', BudgetController.getSummary);
+budgetRouter.get('/comparison/:year/:month', BudgetController.getComparison);
 budgetRouter.get('/', BudgetController.getAll);
 budgetRouter.post('/', writeLimiter, BudgetController.create);
 budgetRouter.put('/:id', writeLimiter, BudgetController.update);

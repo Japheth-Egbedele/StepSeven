@@ -1,0 +1,304 @@
+/* src/styles/BabySteps.css */
+@import './variables.css';
+
+.baby-steps-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.baby-steps-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+/* Journey Progress */
+.journey-progress {
+  text-align: center;
+  margin-bottom: 48px;
+  padding: 32px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.journey-progress h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 32px;
+}
+
+.progress-tracker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.progress-dot {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+  background: #F3F4F6;
+  color: #9CA3AF;
+  border: 3px solid #E5E7EB;
+  transition: all 0.3s ease;
+}
+
+.progress-dot.current {
+  background: #3B82F6;
+  color: white;
+  border-color: #3B82F6;
+  transform: scale(1.1);
+}
+
+.progress-dot.completed {
+  background: #10B981;
+  color: white;
+  border-color: #10B981;
+}
+
+.progress-line {
+  flex: 1;
+  height: 4px;
+  background: #E5E7EB;
+  transition: background 0.3s ease;
+}
+
+.progress-line.completed {
+  background: #10B981;
+}
+
+/* Steps Grid */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.step-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.step-card.current {
+  border-color: #3B82F6;
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+}
+
+.step-card.completed {
+  border-color: #10B981;
+  opacity: 0.8;
+}
+
+.step-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.step-number {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.step-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 8px;
+}
+
+.step-card p {
+  font-size: 14px;
+  color: #6B7280;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Step Progress */
+.step-progress {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.progress-info span:first-child {
+  font-weight: 600;
+  color: #3B82F6;
+}
+
+.progress-info span:last-child {
+  color: #6B7280;
+}
+
+.progress-percentage {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B7280;
+  margin-top: 8px;
+}
+
+/* Debt Info */
+.debt-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.debt-stat {
+  text-align: center;
+  padding: 12px;
+  background: #F9FAFB;
+  border-radius: 8px;
+}
+
+.debt-label {
+  display: block;
+  font-size: 12px;
+  color: #6B7280;
+  margin-bottom: 4px;
+}
+
+.debt-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.debt-list {
+  margin-top: 16px;
+}
+
+.debt-list h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B7280;
+  margin-bottom: 12px;
+}
+
+.debt-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.debt-item:last-child {
+  border-bottom: none;
+}
+
+/* Step Status */
+.step-completed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #D1FAE5;
+  border-radius: 8px;
+  color: #065F46;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+.check-icon {
+  font-size: 20px;
+}
+
+.btn-complete-step {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  background: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-complete-step:hover {
+  background: #2563EB;
+}
+
+/* Motivation Card */
+.motivation-card {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: white;
+  padding: 32px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.motivation-card h3 {
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.motivation-card p {
+  font-size: 18px;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .progress-tracker {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .progress-line {
+    width: 4px;
+    height: 40px;
+  }
+  
+  .debt-summary {
+    grid-template-columns: 1fr;
+  }
+}

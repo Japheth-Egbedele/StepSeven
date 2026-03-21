@@ -1,7 +1,5 @@
-// Multi-Currency Support
-// ============================================================
-
-import React, { createContext, useState, useEffect, useContext } from 'react';
+// src/context/CurrencyContext.jsx
+import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 
 const CurrencyContext = createContext();
@@ -19,40 +17,27 @@ export const CurrencyProvider = ({ children }) => {
   const [currency, setCurrency] = useState({
     code: 'NGN',
     symbol: '₦',
-    subunitName: 'kobo',
     subunitToUnit: 100
   });
 
   useEffect(() => {
-    if (user && user.currency) {
-      setCurrency(user.currency);
+    if (user?.currency) {
+      setCurrency({
+        code: user.currency.code || 'NGN',
+        symbol: user.currency.symbol || '₦',
+        subunitToUnit: user.currency.subunitToUnit || 100
+      });
     }
   }, [user]);
 
-  const formatMoney = (amountInSubunits) => {
-    const amount = amountInSubunits / currency.subunitToUnit;
-    return `${currency.symbol}${amount.toLocaleString('en-NG', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}`;
-  };
-
-  const toSubunits = (amount) => {
-    return Math.round(amount * currency.subunitToUnit);
-  };
-
-  const fromSubunits = (amount) => {
-    return amount / currency.subunitToUnit;
-  };
-
   const value = {
     currency,
-    formatMoney,
-    toSubunits,
-    fromSubunits
+    setCurrency
   };
 
-  return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
+  return (
+    <CurrencyContext.Provider value={value}>
+      {children}
+    </CurrencyContext.Provider>
+  );
 };
-
-export default CurrencyProvider;

@@ -2,6 +2,7 @@ const Account = require('../models/Account');
 const Transaction = require('../models/Transaction');
 const Progress = require('../models/Progress');
 const DateUtils = require('../utils/dateUtils');
+const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
 class BabyStepService {
@@ -9,20 +10,21 @@ class BabyStepService {
    * Calculate and update user's current Baby Step
    */
   static async calculateCurrentStep(userId) {
-    let progress = await Progress.findOne({ user: userId });
-    
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    let progress = await Progress.findOne({ user: userObjectId });
+
     if (!progress) {
-      progress = new Progress({ user: userId });
+      progress = new Progress({ user: userObjectId });
     }
 
-    // Get all user accounts
-    const accounts = await Account.find({ user: userId, isActive: true });
+    const accounts = await Account.find({ user: userObjectId, isActive: true });
 
-    // STEP 1: Check starter emergency fund
-    const emergencyAccounts = accounts.filter(acc => 
-      acc.type === 'ASSET' && 
+    // ─── STEP 1: Starter Emergency Fund ──────────────────────────────────────
+    // Detects by isEmergencyFund flag first, falls back to name for legacy accounts
+    const emergencyAccounts = accounts.filter(acc =>
+      acc.type === 'ASSET' &&
       (acc.subType === 'BANK' || acc.subType === 'CASH') &&
-      acc.name.toLowerCase().includes('emergency')
+      (acc.isEmergencyFund === true || acc.name.toLowerCase().includes('emergency'))
     );
 
     const emergencyTotal = emergencyAccounts.reduce((sum, acc) => sum + acc.balance, 0);
@@ -31,15 +33,14 @@ class BabyStepService {
     if (emergencyTotal >= progress.step1.targetAmount && !progress.step1.completed) {
       progress.step1.completed = true;
       progress.step1.completedDate = new Date().toISOString();
-      progress.currentStep = 2;
+      progress.currentStep = Math.max(progress.currentStep, 2);
       logger.info(`User ${userId} completed Baby Step 1!`);
     }
 
-    // STEP 2: Debt Snowball
-    const liabilityAccounts = accounts.filter(acc => 
-      acc.type === 'LIABILITY' && 
-      acc.subType !== 'INITIAL_BALANCE' &&
-      acc.balance > 0
+    // ─── STEP 2: Debt Snowball ────────────────────────────────────────────────
+    const liabilityAccounts = accounts.filter(acc =>
+      acc.type === 'LIABILITY' &&
+      acc.subType !== 'INITIAL_BALANCE'
     );
 
     const sortedDebts = liabilityAccounts
@@ -56,24 +57,34 @@ class BabyStepService {
 
     progress.step2.debts = sortedDebts;
     progress.step2.totalDebtRemaining = sortedDebts.reduce((sum, d) => sum + d.currentBalance, 0);
+    progress.step2.totalDebtOriginal = sortedDebts.reduce((sum, d) => sum + d.originalBalance, 0);
 
-    if (progress.step1.completed && progress.step2.totalDebtRemaining === 0 && !progress.step2.completed) {
+    if (
+      progress.step1.completed &&
+      progress.step2.totalDebtRemaining === 0 &&
+      sortedDebts.length > 0 &&
+      !progress.step2.completed
+    ) {
       progress.step2.completed = true;
       progress.step2.completedDate = new Date().toISOString();
-      progress.currentStep = 3;
+      progress.currentStep = Math.max(progress.currentStep, 3);
       logger.info(`User ${userId} completed Baby Step 2!`);
     }
 
-    // STEP 3: Full emergency fund
+    // ─── STEP 3: Full Emergency Fund (3–6 months expenses) ───────────────────
     if (progress.step2.completed) {
       const avgMonthlyExpense = await this.calculateAverageMonthlyExpense(userId);
       progress.step3.targetAmount = avgMonthlyExpense * progress.step3.monthsOfExpenses;
       progress.step3.currentAmount = emergencyTotal;
 
-      if (emergencyTotal >= progress.step3.targetAmount && !progress.step3.completed) {
+      if (
+        progress.step3.targetAmount > 0 &&
+        emergencyTotal >= progress.step3.targetAmount &&
+        !progress.step3.completed
+      ) {
         progress.step3.completed = true;
         progress.step3.completedDate = new Date().toISOString();
-        progress.currentStep = 4;
+        progress.currentStep = Math.max(progress.currentStep, 4);
         logger.info(`User ${userId} completed Baby Step 3!`);
       }
     }
@@ -86,6 +97,7 @@ class BabyStepService {
 
   /**
    * Calculate average monthly expense from last 6 months
+   * Fixed: userId must be cast to ObjectId for aggregation pipeline
    */
   static async calculateAverageMonthlyExpense(userId) {
     const sixMonthsAgo = DateUtils.subMonths(new Date(), 6).toISOString();
@@ -94,7 +106,7 @@ class BabyStepService {
     const result = await Transaction.aggregate([
       {
         $match: {
-          user: userId,
+          user: new mongoose.Types.ObjectId(userId), // ← was: userId (string) — bug fixed
           type: 'EXPENSE',
           date: { $gte: sixMonthsAgo, $lte: now }
         }
@@ -108,29 +120,30 @@ class BabyStepService {
     ]);
 
     if (result.length === 0) return 0;
-
-    const totalExpense = result[0].totalExpense;
-    return Math.round(totalExpense / 6);
+    return Math.round(result[0].totalExpense / 6);
   }
 
   /**
-   * Get Gazelle Intensity metrics
+   * Get Gazelle Intensity metrics + Days Ahead
+   * daysAhead = total liquid assets ÷ daily burn rate
    */
   static async getGazelleIntensity(userId) {
-    const accounts = await Account.find({ 
-      user: userId, 
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const liquidAccounts = await Account.find({
+      user: userObjectId,
       type: 'ASSET',
       subType: { $in: ['CASH', 'BANK'] },
-      isActive: true 
+      isActive: true
     });
 
-    const totalLiquid = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalLiquid = liquidAccounts.reduce((sum, acc) => sum + acc.balance, 0);
 
     const startOfCurrentMonth = DateUtils.startOfMonth(new Date()).toISOString();
     const now = new Date().toISOString();
 
     const transactions = await Transaction.find({
-      user: userId,
+      user: userObjectId,
       date: { $gte: startOfCurrentMonth, $lte: now },
       type: { $in: ['INCOME', 'EXPENSE'] }
     });
@@ -145,27 +158,33 @@ class BabyStepService {
 
     const unallocated = monthlyIncome - monthlyExpense;
 
+    // Days Ahead: how long current liquid assets cover daily expenses
+    const avgMonthlyExpense = await this.calculateAverageMonthlyExpense(userId);
+    const dailyBurnRate = avgMonthlyExpense > 0 ? avgMonthlyExpense / 30 : 0;
+    const daysAhead = dailyBurnRate > 0 ? Math.floor(totalLiquid / dailyBurnRate) : 0;
+
     return {
-      unallocated,
       totalLiquid,
       monthlyIncome,
       monthlyExpense,
+      unallocated,
+      avgMonthlyExpense,
+      dailyBurnRate: Math.round(dailyBurnRate),
+      daysAhead,
       shouldThrowAtDebt: unallocated > 0
     };
   }
 
   /**
-   * Get smallest debt for snowball
+   * Get smallest unpaid debt for snowball focus
    */
   static async getSmallestDebt(userId) {
-    const progress = await Progress.findOne({ user: userId });
+    const progress = await Progress.findOne({ user: new mongoose.Types.ObjectId(userId) });
     if (!progress || progress.step2.debts.length === 0) return null;
 
-    const smallestDebt = progress.step2.debts
+    return progress.step2.debts
       .filter(d => !d.isPaidOff)
-      .sort((a, b) => a.currentBalance - b.currentBalance)[0];
-
-    return smallestDebt;
+      .sort((a, b) => a.currentBalance - b.currentBalance)[0] || null;
   }
 }
 

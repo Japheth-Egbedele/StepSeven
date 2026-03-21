@@ -172,9 +172,14 @@ const AccountSchema = new mongoose.Schema({
       ref: 'Category'
     }
   }],
-  isActive: {
+isActive: {
     type: Boolean,
     default: true,
+    index: true
+  },
+  isEmergencyFund: {
+    type: Boolean,
+    default: false,
     index: true
   },
   order: {

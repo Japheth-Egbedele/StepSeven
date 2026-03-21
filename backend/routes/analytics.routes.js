@@ -7,5 +7,7 @@ analyticsRouter.use(checkAuth);
 
 analyticsRouter.get('/expenses-by-category', AnalyticsController.getExpensesByCategory);
 analyticsRouter.get('/monthly-cashflow', AnalyticsController.getMonthlyCashFlow);
-
+analyticsRouter.get('/networth-trend', AnalyticsController.getNetWorthTrend);
+analyticsRouter.get('/budget-comparison', AnalyticsController.getBudgetComparison);
+analyticsRouter.get('/spending-trends', AnalyticsController.getSpendingTrends);
 module.exports = analyticsRouter;

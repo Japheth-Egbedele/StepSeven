@@ -78,13 +78,16 @@ const validateAccountUpdate = [
   handleValidationErrors
 ];
 
-// Routes
+router.get('/summary/net-worth', AccountController.getNetWorth);
+
+// 3. General list route
 router.get('/', AccountController.getAll);
-router.get('/summary/networth', AccountController.getNetWorth);
+
+// 4. Parameterized routes come LAST
 router.get('/:id', validateObjectId('id'), AccountController.getById);
 router.get('/:id/balance', validateObjectId('id'), AccountController.getBalance);
+
 router.post('/', writeLimiter, validateAccountCreate, AccountController.create);
 router.put('/:id', writeLimiter, validateObjectId('id'), validateAccountUpdate, AccountController.update);
 router.delete('/:id', writeLimiter, validateObjectId('id'), AccountController.delete);
-
 module.exports = router;

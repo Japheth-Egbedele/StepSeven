@@ -96,6 +96,34 @@ class BudgetController {
       res.status(400).json({ success: false, message: error.message });
     }
   }
-}
 
+  static async getSummary(req, res) {
+    try {
+      const userId = req.user.id;
+      const { year, month } = req.params;
+      
+      // Placeholder logic to prevent crash
+      res.status(200).json({ 
+        success: true, 
+        data: { totalBudgeted: 0, totalSpent: 0 } 
+      });
+    } catch (error) {
+      logger.error('Get summary error:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  static async getComparison(req, res) {
+    try {
+      const userId = req.user.id;
+      res.status(200).json({ 
+        success: true, 
+        data: [] 
+      });
+    } catch (error) {
+      logger.error('Get comparison error:', error);
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+}
 module.exports = BudgetController;

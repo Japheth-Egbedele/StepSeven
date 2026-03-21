@@ -137,15 +137,15 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-app.use(errorHandler);
-
-// 404 handler
+// 404 handler — must come BEFORE the error handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: 'Route not found'
   });
 });
+
+app.use(errorHandler);
 
 // ============================================================
 // Start Server

@@ -1,0 +1,115 @@
+/* src/styles/SpendingChart.css */
+
+.spending-chart {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.donut-chart {
+  flex-shrink: 0;
+  width: 300px;
+  height: 300px;
+}
+
+.donut-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.donut-segment {
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.donut-segment:hover {
+  opacity: 0.8;
+}
+
+.donut-label {
+  font-size: 14px;
+  fill: #6B7280;
+  font-weight: 500;
+}
+
+.donut-value {
+  font-size: 18px;
+  fill: #1F2937;
+  font-weight: 700;
+}
+
+/* Legend */
+.chart-legend-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.legend-item:hover {
+  background: #F9FAFB;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.legend-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.legend-category {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legend-amount {
+  font-size: 13px;
+  color: #6B7280;
+}
+
+.legend-percentage {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3B82F6;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .spending-chart {
+    flex-direction: column;
+  }
+  
+  .donut-chart {
+    width: 250px;
+    height: 250px;
+  }
+  
+  .chart-legend-list {
+    max-height: none;
+    width: 100%;
+  }
+}

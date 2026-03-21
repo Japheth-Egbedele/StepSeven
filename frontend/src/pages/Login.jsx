@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +9,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +20,8 @@ const Login = () => {
       await login(formData);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Login failed');
+      // err is already the parsed response body from the axios interceptor
+      setError(err.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -36,33 +37,45 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <h2>Welcome Back</h2>
-          
-          {error && <div className="error-message">{error}</div>}
+
+          {error && <div className="auth-error">{error}</div>}
 
           <div className="form-group">
-            <label>Email Address</label>
+            <label htmlFor="email">Email Address</label>
             <input
               type="email"
+              id="email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
               placeholder="you@example.com"
               required
               autoFocus
             />
           </div>
 
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              placeholder="••••••••"
-              required
-            />
+            <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <div className="input-with-toggle">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={formData.password}
+                onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(prev => !prev)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
-          <button type="submit" disabled={loading}>
+          <button type="submit" className="auth-button" disabled={loading}>
             {loading ? 'Signing In...' : 'Sign In'}
           </button>
 

@@ -56,6 +56,29 @@ class DateUtils {
     return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
   }
 
+  static subWeeks(date, weeks) {
+    const d = new Date(date);
+    d.setUTCDate(d.getUTCDate() - weeks * 7);
+    return d;
+  }
+
+  static startOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getUTCDay(); // 0 = Sunday
+    const diff = day === 0 ? -6 : 1 - day; // Monday-based week
+    d.setUTCDate(d.getUTCDate() + diff);
+    d.setUTCHours(0, 0, 0, 0);
+    return d;
+  }
+
+  static endOfWeek(date) {
+    const start = this.startOfWeek(date);
+    const d = new Date(start);
+    d.setUTCDate(d.getUTCDate() + 6);
+    d.setUTCHours(23, 59, 59, 999);
+    return d;
+  }
+  
   static format(date, formatString = 'DD/MM/YYYY') {
     const d = new Date(date);
     const day = String(d.getUTCDate()).padStart(2, '0');

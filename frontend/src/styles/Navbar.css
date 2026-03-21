@@ -1,0 +1,104 @@
+/* src/styles/Navbar.css */
+.navbar {
+  background: white;
+  border-bottom: 1px solid #E5E7EB;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.navbar-brand h1 {
+  font-size: 1.5rem;
+  color: #008751;
+  font-weight: 700;
+  margin: 0;
+}
+
+.navbar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.net-worth-badge {
+  background: #F9FAFB;
+  padding: 8px 24px;
+  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-label {
+  font-size: 0.75rem;
+  color: #6B7280;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.badge-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: #10B981;
+}
+
+.badge-amount.negative {
+  color: #EF4444;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: #008751;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: #6B7280;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.logout-btn:hover {
+  color: #EF4444;
+}
