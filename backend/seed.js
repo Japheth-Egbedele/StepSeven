@@ -48,7 +48,7 @@ async function runSeed() {
             { name: 'Food', type: 'EXPENSE', icon: 'restaurant', color: '#FF5722', user: USER_ID },
             { name: 'Rent', type: 'EXPENSE', icon: 'home', color: '#2196F3', user: USER_ID }
         ]);
-
+//ndhhdhhdh
         // 4. ACCOUNTS
         console.log("🏦 Creating Account...");
         const gtBank = await Account.create({
