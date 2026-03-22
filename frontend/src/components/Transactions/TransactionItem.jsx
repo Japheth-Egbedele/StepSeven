@@ -1,12 +1,12 @@
 import React from 'react';
 import { useCurrency } from '../../context/CurrencyContext';
-import './TransactionItem.css';
+import '../../styles/components/TransactionItem.css';
 
 const TransactionItem = ({ transaction, onEdit, onDelete }) => {
   const { formatMoney } = useCurrency();
 
   const getTypeIcon = (type) => {
-    switch(type) {
+    switch (type) {
       case 'INCOME': return '💰';
       case 'EXPENSE': return '💸';
       case 'TRANSFER': return '🔄';
@@ -16,10 +16,10 @@ const TransactionItem = ({ transaction, onEdit, onDelete }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-NG', { 
+    return date.toLocaleDateString('en-NG', {
       year: 'numeric',
-      month: 'short', 
-      day: 'numeric' 
+      month: 'short',
+      day: 'numeric'
     });
   };
 

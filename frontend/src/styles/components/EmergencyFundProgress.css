@@ -1,0 +1,115 @@
+.emergency-fund-progress {
+  background: linear-gradient(135deg, #065F46 0%, #008751 100%);
+  border-radius: 16px;
+  padding: 28px;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.fund-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.fund-header p {
+  font-size: 14px;
+  opacity: 0.8;
+  margin: 0 0 24px;
+}
+
+.fund-visual {
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+  margin-bottom: 20px;
+}
+
+.fund-jar {
+  width: 60px;
+  height: 100px;
+  border: 3px solid rgba(255,255,255,0.6);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.2);
+}
+
+.fund-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255,255,255,0.4);
+  transition: height 0.6s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fund-amount {
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+.fund-stats {
+  display: flex;
+  gap: 24px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat label {
+  font-size: 11px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat strong {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.stat strong.remaining {
+  color: #FCD34D;
+}
+
+.progress-bar-large {
+  height: 10px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill-large {
+  height: 100%;
+  background: rgba(255,255,255,0.9);
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+
+.progress-text-large {
+  font-size: 13px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.celebration {
+  margin-top: 16px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}

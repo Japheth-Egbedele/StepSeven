@@ -1,0 +1,83 @@
+.snowball-visualizer {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.visualizer-header {
+  margin-bottom: 20px;
+}
+
+.visualizer-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px;
+}
+
+.visualizer-header p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.chart-container {
+  margin-bottom: 24px;
+}
+
+.snowball-tooltip {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.snowball-tooltip h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px;
+}
+
+.snowball-tooltip p {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 2px 0;
+}
+
+.snowball-strategy h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px;
+}
+
+.snowball-strategy ol {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.snowball-strategy li {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: #F9FAFB;
+  border-radius: 6px;
+  list-style-position: outside;
+}
+
+.snowball-strategy li.target-debt {
+  background: #FEF2F2;
+  border-left: 3px solid #EF4444;
+}
+
+.target-badge {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #EF4444;
+}

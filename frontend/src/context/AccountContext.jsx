@@ -12,6 +12,9 @@ export const useAccounts = () => {
   return context;
 };
 
+// Alias for components expecting useAccountContext
+export const useAccountContext = useAccounts;
+
 export const AccountProvider = ({ children }) => {
   const { user } = useAuth();
   const [accounts, setAccounts] = useState([]); // Always starts as array
@@ -67,7 +70,7 @@ export const AccountProvider = ({ children }) => {
 
     const assets = accounts.filter(acc => acc.type === 'ASSET');
     const liabilities = accounts.filter(acc => acc.type === 'LIABILITY');
-    
+
     const totalAssets = assets.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
     const totalLiabilities = liabilities.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0);
 

@@ -1,0 +1,54 @@
+.gazelle-intensity-widget {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border: 1px solid #F59E0B;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 24px;
+}
+
+.widget-icon {
+  font-size: 36px;
+  flex-shrink: 0;
+}
+
+.widget-content {
+  flex: 1;
+}
+
+.widget-content h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #92400E;
+  margin: 0 0 4px;
+}
+
+.widget-content p {
+  font-size: 14px;
+  color: #78350F;
+  margin: 0 0 2px;
+}
+
+.widget-content .motivation {
+  font-size: 13px;
+  color: #92400E;
+  font-style: italic;
+}
+
+.throw-debt-btn {
+  white-space: nowrap;
+  background: #F59E0B;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.throw-debt-btn:hover { background: #D97706; }

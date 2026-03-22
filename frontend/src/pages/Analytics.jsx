@@ -1,4 +1,3 @@
-// src/pages/Analytics.jsx
 import { useState, useEffect } from 'react';
 import { analyticsAPI } from '../api/analyticsAPI';
 import { useCurrency } from '../context/CurrencyContext';
@@ -11,9 +10,8 @@ const Analytics = () => {
   const [spendingData, setSpendingData] = useState([]);
   const [cashFlowData, setCashFlowData] = useState([]);
   const [netWorthData, setNetWorthData] = useState([]);
-  const [monthlySummary, setMonthlySummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('6'); // months
+  const [timeRange, setTimeRange] = useState('6');
 
   useEffect(() => {
     fetchAnalytics();
@@ -24,25 +22,28 @@ const Analytics = () => {
     try {
       const now = new Date();
       const startDate = new Date(now.getFullYear(), now.getMonth() - parseInt(timeRange), 1);
-      const endDate = now;
 
-      const [spending, cashFlow, netWorth, summary] = await Promise.all([
-        analyticsAPI.getSpendingByCategory(startDate.toISOString(), endDate.toISOString()),
-        analyticsAPI.getCashFlowTrend(parseInt(timeRange)),
-        analyticsAPI.getNetWorthTrend(parseInt(timeRange)),
-        analyticsAPI.getMonthlySummary(now.getFullYear(), now.getMonth() + 1)
+      const [spending, cashFlow, netWorth] = await Promise.all([
+        analyticsAPI.getExpensesByCategory(startDate.toISOString(), now.toISOString()),
+        analyticsAPI.getMonthlyCashFlow(parseInt(timeRange)),
+        analyticsAPI.getNetWorthTrend(parseInt(timeRange))
       ]);
 
       setSpendingData(spending.data || []);
       setCashFlowData(cashFlow.data || []);
       setNetWorthData(netWorth.data || []);
-      setMonthlySummary(summary);
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Derive current month summary from cashflow data (last item = most recent month)
+  const currentMonth = cashFlowData[cashFlowData.length - 1] || null;
+  const totalIncome = currentMonth?.income || 0;
+  const totalExpenses = currentMonth?.expense || 0;
+  const netCashFlow = totalIncome - totalExpenses;
 
   if (loading) {
     return (
@@ -53,10 +54,6 @@ const Analytics = () => {
     );
   }
 
-  const totalIncome = monthlySummary?.totalIncome || 0;
-  const totalExpenses = monthlySummary?.totalExpenses || 0;
-  const netCashFlow = totalIncome - totalExpenses;
-
   return (
     <div className="analytics-page">
       <header className="page-header">
@@ -64,8 +61,8 @@ const Analytics = () => {
           <h1>Financial Analytics</h1>
           <p className="page-subtitle">Visualize your financial journey</p>
         </div>
-        <select 
-          value={timeRange} 
+        <select
+          value={timeRange}
           onChange={(e) => setTimeRange(e.target.value)}
           className="time-range-select"
         >
@@ -75,12 +72,12 @@ const Analytics = () => {
         </select>
       </header>
 
-      {/* Summary Cards */}
+      {/* Summary Cards — derived from most recent month in cashflow */}
       <div className="analytics-summary">
         <div className="summary-card income">
           <div className="summary-icon">📈</div>
           <div className="summary-content">
-            <h3>Total Income</h3>
+            <h3>Income</h3>
             <p className="summary-value" style={{ color: '#10B981' }}>
               {formatMoney(totalIncome, currency.symbol, currency.subunitToUnit)}
             </p>
@@ -91,7 +88,7 @@ const Analytics = () => {
         <div className="summary-card expenses">
           <div className="summary-icon">📉</div>
           <div className="summary-content">
-            <h3>Total Expenses</h3>
+            <h3>Expenses</h3>
             <p className="summary-value" style={{ color: '#EF4444' }}>
               {formatMoney(totalExpenses, currency.symbol, currency.subunitToUnit)}
             </p>
@@ -111,18 +108,13 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Charts Section */}
+      {/* Charts */}
       <div className="charts-grid">
-        {/* Spending by Category */}
         <div className="chart-card">
           <h2>Spending by Category</h2>
-          <SpendingChart 
-            data={spendingData} 
-            currency={currency}
-          />
+          <SpendingChart data={spendingData} currency={currency} />
         </div>
 
-        {/* Cash Flow Trend */}
         <div className="chart-card">
           <h2>Cash Flow Trend</h2>
           {cashFlowData.length > 0 ? (
@@ -132,23 +124,27 @@ const Analytics = () => {
                 <span><span className="legend-dot expense"></span> Expenses</span>
               </div>
               <div className="simple-bar-chart">
-                {cashFlowData.map((item, idx) => (
-                  <div key={idx} className="bar-group">
-                    <div className="bars">
-                      <div 
-                        className="bar income-bar" 
-                        style={{ height: `${(item.income / Math.max(...cashFlowData.map(d => d.income))) * 100}%` }}
-                        title={formatMoney(item.income, currency.symbol, currency.subunitToUnit)}
-                      />
-                      <div 
-                        className="bar expense-bar" 
-                        style={{ height: `${(item.expenses / Math.max(...cashFlowData.map(d => d.expenses))) * 100}%` }}
-                        title={formatMoney(item.expenses, currency.symbol, currency.subunitToUnit)}
-                      />
+                {cashFlowData.map((item, idx) => {
+                  const maxIncome = Math.max(...cashFlowData.map(d => d.income), 1);
+                  const maxExpense = Math.max(...cashFlowData.map(d => d.expense), 1);
+                  return (
+                    <div key={idx} className="bar-group">
+                      <div className="bars">
+                        <div
+                          className="bar income-bar"
+                          style={{ height: `${(item.income / maxIncome) * 100}%` }}
+                          title={formatMoney(item.income, currency.symbol, currency.subunitToUnit)}
+                        />
+                        <div
+                          className="bar expense-bar"
+                          style={{ height: `${(item.expense / maxExpense) * 100}%` }}
+                          title={formatMoney(item.expense, currency.symbol, currency.subunitToUnit)}
+                        />
+                      </div>
+                      <span className="bar-label">{item._id}</span>
                     </div>
-                    <span className="bar-label">{item.month}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : (
@@ -156,26 +152,26 @@ const Analytics = () => {
           )}
         </div>
 
-        {/* Net Worth Trend */}
         <div className="chart-card full-width">
           <h2>Net Worth Trend</h2>
           {netWorthData.length > 0 ? (
             <div className="line-chart">
-              {netWorthData.map((item, idx) => (
-                <div key={idx} className="line-point">
-                  <div 
-                    className="point" 
-                    style={{ 
-                      bottom: `${(item.netWorth / Math.max(...netWorthData.map(d => d.netWorth))) * 80}%` 
-                    }}
-                  >
-                    <span className="point-tooltip">
-                      {formatMoney(item.netWorth, currency.symbol, currency.subunitToUnit)}
-                    </span>
+              {netWorthData.map((item, idx) => {
+                const maxNW = Math.max(...netWorthData.map(d => Math.abs(d.netWorth)), 1);
+                return (
+                  <div key={idx} className="line-point">
+                    <div
+                      className="point"
+                      style={{ bottom: `${(item.netWorth / maxNW) * 80}%` }}
+                    >
+                      <span className="point-tooltip">
+                        {formatMoney(item.netWorth, currency.symbol, currency.subunitToUnit)}
+                      </span>
+                    </div>
+                    <span className="point-label">{item.month}</span>
                   </div>
-                  <span className="point-label">{item.month}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="chart-empty">No net worth data available</div>
@@ -183,37 +179,34 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Insights Section */}
+      {/* Insights */}
       <div className="insights-section">
         <h2>Financial Insights</h2>
         <div className="insights-grid">
           <div className="insight-card">
             <h3>💡 Top Spending Category</h3>
             <p>
-              {spendingData.length > 0 
-                ? `${spendingData[0]?.category}: ${formatMoney(spendingData[0]?.amount, currency.symbol, currency.subunitToUnit)}`
-                : 'No data yet'
-              }
+              {spendingData.length > 0
+                ? `${spendingData[0]?.categoryName}: ${formatMoney(spendingData[0]?.totalAmount, currency.symbol, currency.subunitToUnit)}`
+                : 'No data yet'}
             </p>
           </div>
           <div className="insight-card">
-            <h3>📊 Spending Trend</h3>
+            <h3>📊 This Month</h3>
             <p>
-              {totalExpenses > 0 
-                ? netCashFlow >= 0 
-                  ? 'Great job! You\'re spending less than you earn.' 
-                  : 'Warning: Spending exceeds income this month.'
-                : 'No expenses recorded yet'
-              }
+              {totalExpenses > 0
+                ? netCashFlow >= 0
+                  ? "You're spending less than you earn. Keep it up."
+                  : "Spending exceeds income this month. Review your budget."
+                : 'No expenses recorded yet'}
             </p>
           </div>
           <div className="insight-card">
             <h3>🎯 Recommendation</h3>
             <p>
-              {netCashFlow >= 0 
-                ? 'Consider increasing your emergency fund or investments.'
-                : 'Review your budget and cut unnecessary expenses.'
-              }
+              {netCashFlow >= 0
+                ? 'Consider increasing your emergency fund or Baby Step contributions.'
+                : 'Review your budget and cut unnecessary expenses.'}
             </p>
           </div>
         </div>

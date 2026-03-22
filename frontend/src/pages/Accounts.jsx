@@ -8,13 +8,15 @@ import '../styles/Accounts.css';
 const Accounts = () => {
   const { accounts, assets, liabilities, createAccount, updateAccount, deleteAccount, loading } = useAccounts();
   const { currency } = useCurrency();
-  
+
   const [showModal, setShowModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     type: 'ASSET',
+    subType: 'BANK',
     balance: '',
+    isEmergencyFund: false,
     description: ''
   });
   const [formError, setFormError] = useState('');
@@ -46,7 +48,9 @@ const Accounts = () => {
       const accountData = {
         name: formData.name.trim(),
         type: formData.type,
+        subType: formData.subType,
         balance: parseMoneyInput(formData.balance, currency.subunitToUnit),
+        isEmergencyFund: formData.isEmergencyFund,
         description: formData.description.trim()
       };
 
@@ -69,10 +73,11 @@ const Accounts = () => {
     setFormData({
       name: account.name,
       type: account.type,
+      subType: account.subType || 'BANK',
       balance: (account.balance / currency.subunitToUnit).toFixed(2),
+      isEmergencyFund: account.isEmergencyFund || false,
       description: account.description || ''
     });
-    setShowModal(true);
   };
 
   const handleDelete = async (accountId) => {
@@ -93,7 +98,9 @@ const Accounts = () => {
     setFormData({
       name: '',
       type: 'ASSET',
+      subType: 'BANK',
       balance: '',
+      isEmergencyFund: false,
       description: ''
     });
     setFormError('');
@@ -118,7 +125,7 @@ const Accounts = () => {
             </button>
           </div>
         </div>
-        
+
         <div className="account-balance-section">
           <p className="balance-label">Current Balance</p>
           <p className="balance-amount" style={{
@@ -228,7 +235,7 @@ const Accounts = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  placeholder="e.g., Checking Account, Credit Card"
+                  placeholder="e.g., GTBank Savings, PalmPay"
                   required
                 />
               </div>
@@ -242,8 +249,32 @@ const Accounts = () => {
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="ASSET">Asset (Bank, Cash, Savings)</option>
-                  <option value="LIABILITY">Liability (Credit Card, Loan)</option>
+                  <option value="ASSET">Asset (Cash, Bank, Savings)</option>
+                  <option value="LIABILITY">Liability (Loan, Credit Card)</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="subType">Sub-Type *</label>
+                <select
+                  id="subType"
+                  name="subType"
+                  value={formData.subType}
+                  onChange={handleInputChange}
+                  required
+                >
+                  {formData.type === 'ASSET' ? (
+                    <>
+                      <option value="CASH">Cash (Wallet, Physical)</option>
+                      <option value="BANK">Bank / Mobile Money</option>
+                      <option value="INVESTMENT">Investment</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="LOAN">Loan</option>
+                      <option value="CREDIT_CARD">Credit Card</option>
+                    </>
+                  )}
                 </select>
               </div>
 
@@ -261,20 +292,41 @@ const Accounts = () => {
                     required
                   />
                 </div>
-                <small className="form-hint">
-                  For liabilities, enter the amount you owe (will be stored as negative)
-                </small>
+                {formData.type === 'LIABILITY' && (
+                  <small className="form-hint">Enter the amount you owe</small>
+                )}
               </div>
 
+              {/* Emergency fund flag — only for ASSET accounts */}
+              {formData.type === 'ASSET' && (
+                <div className="form-group form-group-checkbox">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="isEmergencyFund"
+                      checked={formData.isEmergencyFund || false}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        isEmergencyFund: e.target.checked
+                      }))}
+                    />
+                    <span>This is my Emergency Fund account</span>
+                  </label>
+                  <small className="form-hint">
+                    Marks this account for Baby Steps tracking
+                  </small>
+                </div>
+              )}
+
               <div className="form-group">
-                <label htmlFor="description">Description (Optional)</label>
+                <label htmlFor="description">Notes (Optional)</label>
                 <textarea
                   id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Add any notes about this account..."
-                  rows="3"
+                  placeholder="Any notes about this account..."
+                  rows="2"
                 />
               </div>
 

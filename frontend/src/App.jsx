@@ -13,6 +13,7 @@ import Accounts from './pages/Accounts';
 import Budgets from './pages/Budgets';
 import BabySteps from './pages/BabySteps';
 import Analytics from './pages/Analytics';
+import Transactions from './pages/Transactions';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Navbar from './components/Layout/Navbar';
@@ -103,14 +104,11 @@ function App() {
                     </ProtectedRoute>
                   } />
                   
-                  {/* Transactions - Placeholder for Phase 5 */}
+                  {/* Transactions */}
                   <Route path="/transactions" element={
                     <ProtectedRoute>
                       <AppLayout>
-                        <div style={{ padding: '40px', textAlign: 'center' }}>
-                          <h2>Transactions</h2>
-                          <p>Coming in Phase 5</p>
-                        </div>
+                        <Transactions />
                       </AppLayout>
                     </ProtectedRoute>
                   } />

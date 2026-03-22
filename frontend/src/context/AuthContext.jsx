@@ -13,41 +13,46 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On mount — check if a valid session cookie exists by hitting /auth/me
-  // No localStorage involved. Cookie is sent automatically by the browser.
   useEffect(() => {
     axios.get('/auth/me')
-      .then(res => setUser(res.data))
+      .then(res => setUser(res.data))   // /auth/me returns { success, data: profile }
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
 
   const login = async (credentials) => {
-    // Backend sets HTTP-only cookie on success — nothing to store locally
     const response = await axios.post('/auth/login', credentials);
-    setUser(response.data);
+    setUser(response.user);             // login returns { success, token, user }
     return response;
   };
 
   const register = async (userData) => {
     const response = await axios.post('/auth/register', userData);
-    setUser(response.data);
+    setUser(response.user);
     return response;
   };
 
   const logout = async () => {
     try {
-      await axios.post('/auth/logout'); // tells backend to clear the cookie
+      await axios.post('/auth/logout');
     } catch {
-      // Even if the request fails, clear local state
+      // clear local state regardless
     } finally {
       setUser(null);
     }
   };
 
-  const updateUser = (updatedUser) => {
-    setUser(updatedUser);
+  // Called by Settings after profile/currency updates
+  const refreshUser = async () => {
+    try {
+      const res = await axios.get('/auth/me');
+      setUser(res.data);
+    } catch {
+      // silently fail — user stays as-is
+    }
   };
+
+  const updateUser = (updatedUser) => setUser(updatedUser);
 
   return (
     <AuthContext.Provider value={{
@@ -56,6 +61,7 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       logout,
+      refreshUser,
       updateUser,
       isAuthenticated: !!user
     }}>

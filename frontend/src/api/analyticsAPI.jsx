@@ -1,39 +1,39 @@
-// src/api/analyticsAPI.js
 import axios from './axios';
 
 export const analyticsAPI = {
-  // Get spending by category
-  getSpendingByCategory: async (startDate, endDate) => {
-    return await axios.get('/analytics/spending-by-category', {
+  // ✅ fixed slug: was /analytics/spending-by-category
+  getExpensesByCategory: async (startDate, endDate) => {
+    return await axios.get('/analytics/expenses-by-category', {
       params: { startDate, endDate }
     });
   },
 
-  // Get income vs expenses trend
-  getCashFlowTrend: async (months = 6) => {
-    return await axios.get('/analytics/cash-flow', {
+  // ✅ fixed slug: was /analytics/cash-flow
+  getMonthlyCashFlow: async (months = 6) => {
+    return await axios.get('/analytics/monthly-cashflow', {
       params: { months }
     });
   },
 
-  // Get net worth trend
-  getNetWorthTrend: async (months = 12) => {
-    return await axios.get('/analytics/net-worth-trend', {
+  // ✅ fixed slug: was /analytics/net-worth-trend (hyphen vs no hyphen)
+  getNetWorthTrend: async (months = 6) => {
+    return await axios.get('/analytics/networth-trend', {
       params: { months }
     });
   },
 
-  // Get spending trends
-  getSpendingTrends: async (year, month) => {
+  // ✅ correct
+  getSpendingTrends: async (weeks = 8, categoryId = null) => {
     return await axios.get('/analytics/spending-trends', {
-      params: { year, month }
+      params: { weeks, ...(categoryId && { categoryId }) }
     });
   },
 
-  // Get monthly summary
-  getMonthlySummary: async (year, month) => {
-    return await axios.get('/analytics/monthly-summary', {
-      params: { year, month }
+  // ✅ new — budget vs actual for current period
+  getBudgetComparison: async (periodKey = null, period = 'MONTHLY') => {
+    return await axios.get('/analytics/budget-comparison', {
+      params: { period, ...(periodKey && { periodKey }) }
     });
   }
+  // getMonthlySummary removed — endpoint does not exist on backend
 };

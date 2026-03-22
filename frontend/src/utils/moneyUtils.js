@@ -8,7 +8,9 @@
  */
 export const subunitsToDecimal = (subunits, subunitToUnit = 100) => {
   if (subunits === null || subunits === undefined) return '0.00';
-  const decimal = subunits / subunitToUnit;
+  const value = Number(subunits);
+  const divisor = Number(subunitToUnit);
+  const decimal = value / divisor;
   return decimal.toFixed(2);
 };
 
@@ -20,9 +22,10 @@ export const subunitsToDecimal = (subunits, subunitToUnit = 100) => {
  */
 export const decimalToSubunits = (decimal, subunitToUnit = 100) => {
   if (!decimal || decimal === '') return 0;
-  const numericValue = typeof decimal === 'string' ? parseFloat(decimal) : decimal;
+  const numericValue = typeof decimal === 'string' ? parseFloat(decimal) : Number(decimal);
+  const multiplier = Number(subunitToUnit);
   if (isNaN(numericValue)) return 0;
-  return Math.round(numericValue * subunitToUnit);
+  return Math.round(numericValue * multiplier);
 };
 
 /**

@@ -4,7 +4,7 @@ import { useAccountContext } from '../../context/AccountContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { transactionAPI } from '../../api/transactionAPI';
 import { categoryAPI } from '../../api/categoryAPI';
-import './TransactionForm.css';
+import '../../styles/components/TransactionForm.css';
 
 const TransactionForm = ({ initialData = null, onSuccess, onCancel }) => {
   const { accounts } = useAccountContext();
@@ -189,15 +189,15 @@ const TransactionForm = ({ initialData = null, onSuccess, onCancel }) => {
 
       {/* Action Buttons */}
       <div className="form-actions">
-        <button 
-          type="button" 
+        <button
+          type="button"
           onClick={onCancel}
           className="btn-secondary"
           disabled={loading}
         >
           Cancel
         </button>
-        <button 
+        <button
           type="submit"
           className="btn-primary"
           disabled={loading}

@@ -1,5 +1,5 @@
 import React from 'react';
-import './TransactionFilters.css';
+import '../../styles/components/TransactionFilters.css';
 
 const TransactionFilters = ({ filters, onFilterChange }) => {
   const handleChange = (key, value) => {

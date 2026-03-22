@@ -16,7 +16,7 @@ export const useTransactions = (filters = {}, page = 1, limit = 50) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await transactionAPI.getAll({ ...filters, page, limit });
+      const response = await transactionAPI.getTransactions({ ...filters, page, limit });
       setTransactions(response.data);
       setPagination(response.pagination);
     } catch (err) {

@@ -99,11 +99,11 @@ export const BabyStepProvider = ({ children }) => {
         ]);
     }, [fetchProgress, fetchEmergencyFund, fetchDebtSnowball]);
 
-    useEffect(() => {
-        if (user) {
-            refreshAll();
-        }
-    }, [user, refreshAll]);
+        useEffect(() => {
+        if (!user) return;
+        refreshAll();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     // Calculate step-specific data
     const getStepProgress = (stepNumber) => {
@@ -112,10 +112,10 @@ export const BabyStepProvider = ({ children }) => {
         switch (stepNumber) {
             case 1:
                 return {
-                    completed: emergencyFund?.current >= 100000, // $1000 in kobo
-                    percentage: emergencyFund ? (emergencyFund.current / emergencyFund.goal) * 100 : 0,
-                    current: emergencyFund?.current || 0,
-                    goal: emergencyFund?.goal || 100000
+                completed: emergencyFund?.currentAmount >= emergencyFund?.targetAmount,
+                percentage: emergencyFund ? (emergencyFund.currentAmount / emergencyFund.targetAmount) * 100 : 0,
+                current: emergencyFund?.currentAmount || 0,
+                goal: emergencyFund?.targetAmount || 12500000
                 };
 
             case 2:
@@ -131,12 +131,11 @@ export const BabyStepProvider = ({ children }) => {
                 };
 
             case 3:
-                const fullGoal = emergencyFund ? emergencyFund.goal * 6 : 600000; // 3-6 months
+                const fullGoal = emergencyFund?.targetAmount || 0;
                 return {
-                    completed: emergencyFund?.current >= fullGoal,
-                    percentage: emergencyFund ? (emergencyFund.current / fullGoal) * 100 : 0,
-                    current: emergencyFund?.current || 0,
-                    goal: fullGoal
+                    completed: progress?.step3?.completed || false,
+                    percentage: fullGoal > 0 ? (emergencyFund.currentAmount / fullGoal) * 100 : 0,
+                    current: emergencyFund?.currentAmount || 0,
                 };
 
             default:

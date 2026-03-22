@@ -1,27 +1,33 @@
 // Paginated Transaction List
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTransactions } from '../../hooks/useTransactions';
 import TransactionItem from './TransactionItem';
 import TransactionForm from './TransactionForm';
 import TransactionFilters from './TransactionFilters';
 import Pagination from '../Common/Pagination';
 import Modal from '../Common/Modal';
-import './TransactionList.css';
 
-const TransactionList = () => {
+const TransactionList = ({ autoOpen = false }) => {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({});
   const [showForm, setShowForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
 
-  const { 
-    transactions, 
-    pagination, 
-    loading, 
-    error, 
-    updateTransaction, 
+  // Auto-open form when navigated from Dashboard quick action
+  useEffect(() => {
+    if (autoOpen) {
+      setShowForm(true);
+    }
+  }, [autoOpen]);
+
+  const {
+    transactions,
+    pagination,
+    loading,
+    error,
+    updateTransaction,
     deleteTransaction,
-    refresh 
+    refresh
   } = useTransactions(filters, page, 50);
 
   const handleEdit = (transaction) => {
@@ -53,7 +59,7 @@ const TransactionList = () => {
     <div className="transaction-list-container">
       <div className="list-header">
         <h1>Transactions</h1>
-        <button 
+        <button
           className="btn-primary"
           onClick={() => {
             setEditingTransaction(null);
@@ -70,7 +76,7 @@ const TransactionList = () => {
         {transactions.length === 0 ? (
           <div className="empty-state">
             <p>No transactions found</p>
-            <button 
+            <button
               className="btn-primary"
               onClick={() => setShowForm(true)}
             >
@@ -100,7 +106,7 @@ const TransactionList = () => {
       </div>
 
       {/* Transaction Form Modal */}
-      <Modal 
+      <Modal
         isOpen={showForm}
         onClose={() => {
           setShowForm(false);

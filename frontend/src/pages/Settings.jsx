@@ -8,8 +8,7 @@ const CURRENCIES = [
   { code: 'NGN', symbol: '₦', name: 'Nigerian Naira', subunitToUnit: 100 },
   { code: 'USD', symbol: '$', name: 'US Dollar', subunitToUnit: 100 },
   { code: 'EUR', symbol: '€', name: 'Euro', subunitToUnit: 100 },
-  { code: 'GBP', symbol: '£', name: 'British Pound', subunitToUnit: 100 },
-  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', subunitToUnit: 100 }
+  { code: 'GBP', symbol: '£', name: 'British Pound', subunitToUnit: 100 }
 ];
 
 const Settings = () => {
@@ -79,8 +78,16 @@ const Settings = () => {
       return;
     }
 
-    if (passwordData.newPassword.length < 6) {
-      setMessage({ type: 'error', text: 'Password must be at least 6 characters' });
+    if (passwordData.newPassword.length < 8) {
+      setMessage({ type: 'error', text: 'Password must be at least 8 characters' });
+      return;
+    }
+    if (!/[A-Z]/.test(passwordData.newPassword)) {
+      setMessage({ type: 'error', text: 'Password must contain at least one uppercase letter' });
+      return;
+    }
+    if (!/[0-9]/.test(passwordData.newPassword)) {
+      setMessage({ type: 'error', text: 'Password must contain at least one number' });
       return;
     }
 
@@ -257,8 +264,7 @@ const Settings = () => {
                     onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
                     required
                   />
-                  <small>Must be at least 6 characters</small>
-                </div>
+                      <small>Min 8 characters, one uppercase, one number</small>                </div>
 
                 <div className="form-group">
                   <label>Confirm New Password</label>

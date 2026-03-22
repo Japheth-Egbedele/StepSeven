@@ -8,7 +8,7 @@ const Sidebar = () => {
     { path: '/accounts', icon: '🏦', label: 'Accounts' },
     { path: '/transactions', icon: '💸', label: 'Transactions' },
     { path: '/budgets', icon: '📋', label: 'Budgets' },
-    { path: '/babysteps', icon: '🎯', label: 'Baby Steps' },
+    { path: '/baby-steps', icon: '🎯', label: 'Baby Steps' },
     { path: '/analytics', icon: '📈', label: 'Analytics' },
     { path: '/settings', icon: '⚙️', label: 'Settings' }
   ];
