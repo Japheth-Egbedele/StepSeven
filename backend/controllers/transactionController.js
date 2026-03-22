@@ -22,8 +22,8 @@ class TransactionController {
       const { type, amount, account, category, date, description, notes, tags } = req.body;
       const userId = req.user.id;
 
-      // Validate amount
-      const amountInSubunits = MoneyUtils.parse(amount.toString());
+      // Validate amount - frontend already sends kobo/subunits
+      const amountInSubunits = Math.round(Math.abs(parseFloat(amount)));
 
       // Validate ownership
       const accountDoc = await Account.findOne({ _id: account, user: userId }).session(session);
@@ -61,7 +61,7 @@ class TransactionController {
         await LedgerService.recordIncome(account, transaction.amount, session);
       } else if (type === 'EXPENSE') {
         await LedgerService.recordExpense(account, transaction.amount, session);
-        
+
         // Update budget spent
         const periodKey = DateUtils.getMonthlyPeriodKey(new Date(date));
         await BudgetService.updateBudgetSpent(userId, category, periodKey);
@@ -116,9 +116,9 @@ class TransactionController {
       // CRITICAL: Reverse old transaction's effect
       await LedgerService.reverseTransaction(existingTransaction, session);
 
-      // Validate new amount if provided
+      // Validate new amount if provided - frontend already sends kobo/subunits
       if (updates.amount) {
-        updates.amount = MoneyUtils.parse(updates.amount.toString());
+        updates.amount = Math.round(Math.abs(parseFloat(updates.amount)));
       }
 
       // Validate new account if changed
@@ -242,13 +242,13 @@ class TransactionController {
   static async getTransactions(req, res) {
     try {
       const userId = req.user.id;
-      const { 
-        page = 1, 
-        limit = 50, 
-        type, 
-        account, 
-        category, 
-        startDate, 
+      const {
+        page = 1,
+        limit = 50,
+        type,
+        account,
+        category,
+        startDate,
         endDate,
         search
       } = req.query;

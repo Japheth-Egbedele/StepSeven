@@ -11,8 +11,8 @@ class TransferController {
       const { amount, fromAccount, toAccount, date, description, notes } = req.body;
       const userId = req.user.id;
 
-      // Validate amount
-      const amountInSubunits = MoneyUtils.parse(amount.toString());
+      // Validate amount - frontend already sends kobo/subunits
+      const amountInSubunits = Math.round(Math.abs(parseFloat(amount)));
 
       // Validate both accounts
       const [sourceAccount, destinationAccount] = await Promise.all([
@@ -99,9 +99,9 @@ class TransferController {
       // Reverse old transfer
       await LedgerService.reverseTransaction(existingTransfer, session);
 
-      // Validate new amount
+      // Validate new amount - frontend already sends kobo/subunits
       if (updates.amount) {
-        updates.amount = MoneyUtils.parse(updates.amount.toString());
+        updates.amount = Math.round(Math.abs(parseFloat(updates.amount)));
       }
 
       // Validate new accounts

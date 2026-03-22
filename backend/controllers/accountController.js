@@ -93,11 +93,11 @@ class AccountController {
   static async create(req, res) {
     try {
       const userId = req.user.id;
-      const { 
-        name, 
-        type, 
-        subType, 
-        balance = 0, 
+      const {
+        name,
+        type,
+        subType,
+        balance = 0,
         includeInTotal = true,
         currency,
         icon,
@@ -117,7 +117,8 @@ class AccountController {
             message: 'Balance cannot be negative'
           });
         }
-        balanceInSubunits = MoneyUtils.toSubunits(Math.abs(balanceNum));
+        // Frontend already sends kobo/subunits, just ensure it's an integer
+        balanceInSubunits = Math.round(Math.abs(balanceNum));
       }
 
       const accountData = {
