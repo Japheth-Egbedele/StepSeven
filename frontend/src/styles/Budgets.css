@@ -147,3 +147,19 @@
     gap: 8px;
   }
 }
+
+.form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #008751;
+}

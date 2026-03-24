@@ -300,3 +300,118 @@
 .empty-state a:hover {
   text-decoration: underline;
 }
+
+/* ── Days Ahead Card ── */
+.days-ahead-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, #065F46 0%, #008751 100%);
+  color: #fff;
+  padding: 24px;
+}
+
+.days-ahead-number {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.days-ahead-label {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.days-ahead-status {
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.15);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+.days-ahead-sub {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.stat-loading {
+  color: #9CA3AF;
+  font-size: 14px;
+}
+
+/* ── Liquid context bar ── */
+.liquid-context {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F0FDF4;
+  border: 1px solid #D1FAE5;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.liquid-label { color: #6B7280; }
+.liquid-amount { font-weight: 700; color: #065F46; }
+.liquid-sep { color: #D1D5DB; }
+
+/* ── Spending Alert ── */
+.spending-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #FEF3C7;
+  border: 1px solid #F59E0B;
+  border-left: 4px solid #F59E0B;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+
+.alert-icon { font-size: 20px; flex-shrink: 0; }
+
+.alert-content { flex: 1; }
+.alert-content strong { 
+  display: block; 
+  font-size: 14px; 
+  color: #92400E; 
+  margin-bottom: 2px; 
+}
+.alert-content p { 
+  font-size: 13px; 
+  color: #78350F; 
+  margin: 0; 
+}
+
+.alert-dismiss {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #92400E;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ── Emergency badge on account cards ── */
+.emergency-badge {
+  font-size: 11px;
+  color: #065F46;
+  background: #D1FAE5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  display: inline-block;
+}

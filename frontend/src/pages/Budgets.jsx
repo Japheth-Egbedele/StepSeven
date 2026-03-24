@@ -4,11 +4,12 @@ import { useBudgets } from '../context/BudgetContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { formatMoney, parseMoneyInput, isValidMoneyInput } from '../utils/moneyUtils';
 import '../styles/Budgets.css';
+import { categoryAPI } from '../api/categoryAPI';
 
 const Budgets = () => {
   const { budgets, currentPeriod, summary, comparison, createBudget, updateBudget, deleteBudget, changePeriod, loading } = useBudgets();
   const { currency } = useCurrency();
-  
+
   const [showModal, setShowModal] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
   const [formData, setFormData] = useState({
@@ -17,6 +18,13 @@ const Budgets = () => {
     period: 'MONTHLY'
   });
   const [formError, setFormError] = useState('');
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    categoryAPI.getAll({ type: 'EXPENSE' })
+      .then(res => setCategories(res?.data || res || []))
+      .catch(() => { });
+  }, []);
 
   useEffect(() => {
     changePeriod(currentPeriod.year, currentPeriod.month);
@@ -24,7 +32,7 @@ const Budgets = () => {
 
   const handlePeriodChange = (direction) => {
     let { year, month } = currentPeriod;
-    
+
     if (direction === 'prev') {
       month--;
       if (month < 1) {
@@ -38,7 +46,7 @@ const Budgets = () => {
         year++;
       }
     }
-    
+
     changePeriod(year, month);
   };
 
@@ -120,16 +128,16 @@ const Budgets = () => {
     );
   }
 
-// Check if budgets is an array; if not, default to 0 to prevent crashing
-const totalBudgeted = Array.isArray(budgets) 
-  ? budgets.reduce((sum, b) => sum + (Number(b.amount) || Number(b.limit) || 0), 0) 
-  : 0;
+  // Check if budgets is an array; if not, default to 0 to prevent crashing
+  const totalBudgeted = Array.isArray(budgets)
+    ? budgets.reduce((sum, b) => sum + (Number(b.amount) || Number(b.limit) || 0), 0)
+    : 0;
 
-const totalSpent = Array.isArray(budgets) 
-  ? budgets.reduce((sum, b) => sum + (Number(b.spent) || 0), 0) 
-  : 0;
+  const totalSpent = Array.isArray(budgets)
+    ? budgets.reduce((sum, b) => sum + (Number(b.spent) || 0), 0)
+    : 0;
 
-const remaining = totalBudgeted - totalSpent;
+  const remaining = totalBudgeted - totalSpent;
 
   return (
     <div className="budgets-page">
@@ -185,7 +193,7 @@ const remaining = totalBudgeted - totalSpent;
           budgets.map(budget => {
             const percentage = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
             const remaining = budget.amount - budget.spent;
-            
+
             return (
               <div key={budget._id} className="budget-item">
                 <div className="budget-header">
@@ -204,17 +212,17 @@ const remaining = totalBudgeted - totalSpent;
                     <button onClick={() => handleDelete(budget._id)} className="btn-icon">🗑️</button>
                   </div>
                 </div>
-                
+
                 <div className="progress-bar-container">
-                  <div 
-                    className="progress-bar-fill" 
-                    style={{ 
+                  <div
+                    className="progress-bar-fill"
+                    style={{
                       width: `${Math.min(percentage, 100)}%`,
                       backgroundColor: getProgressColor(percentage)
                     }}
                   />
                 </div>
-                
+
                 <div className="budget-footer">
                   <span className="budget-percentage">{percentage.toFixed(0)}% used</span>
                   <span className="budget-remaining" style={{ color: remaining >= 0 ? '#10B981' : '#EF4444' }}>
@@ -242,15 +250,20 @@ const remaining = totalBudgeted - totalSpent;
 
               <div className="form-group">
                 <label htmlFor="category">Category *</label>
-                <input
-                  type="text"
+                <select
                   id="category"
-                  name="category"
                   value={formData.category}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  placeholder="e.g., Groceries, Entertainment"
                   required
-                />
+                  className="form-select"
+                >
+                  <option value="">Select a category</option>
+                  {categories.map(cat => (
+                    <option key={cat._id} value={cat._id}>
+                      {cat.icon} {cat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">

@@ -4,18 +4,17 @@ import TransactionList from '../components/Transactions/TransactionList';
 
 const Transactions = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [autoOpenForm, setAutoOpenForm] = useState(false);
+  const [autoOpen, setAutoOpen] = useState(false);
+  const [autoOpenTransfer, setAutoOpenTransfer] = useState(false);
 
-  // Dashboard "Add Transaction" quick action passes ?action=create
   useEffect(() => {
-    if (searchParams.get('action') === 'create') {
-      setAutoOpenForm(true);
-      // Clean the URL param without re-rendering the whole page
-      setSearchParams({}, { replace: true });
-    }
+    const action = searchParams.get('action');
+    if (action === 'create') setAutoOpen(true);
+    if (action === 'transfer') setAutoOpenTransfer(true);
+    if (action) setSearchParams({}, { replace: true });
   }, []);
 
-  return <TransactionList autoOpen={autoOpenForm} />;
+  return <TransactionList autoOpen={autoOpen} autoOpenTransfer={autoOpenTransfer} />;
 };
 
 export default Transactions;

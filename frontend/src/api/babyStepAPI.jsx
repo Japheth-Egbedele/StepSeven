@@ -25,5 +25,13 @@ export const babyStepAPI = {
   // Mark step as complete
   completeStep: async (stepNumber) => {
     return await axios.post(`/babysteps/complete/${stepNumber}`);
+  },
+
+  getDaysAhead: async () => {
+    return await axios.get('/babysteps/days-ahead');
+  },
+
+  getSmallestDebt: async () => {
+    return await axios.get('/babysteps/smallest-debt');
   }
 };
