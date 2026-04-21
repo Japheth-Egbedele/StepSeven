@@ -108,14 +108,14 @@ UserSchema.methods.comparePassword = async function(candidatePassword) {
 };
 
 // Get public profile
-UserSchema.methods.getPublicProfile = function() {
+// In User model, ensure this method exists:
+UserSchema.methods.getPublicProfile = function () {
   return {
-    id: this._id,
+    _id: this._id,
     email: this.email,
     firstName: this.firstName,
     lastName: this.lastName,
     currency: this.currency,
-    preferences: this.preferences,
     createdAt: this.createdAt
   };
 };

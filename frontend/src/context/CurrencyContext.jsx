@@ -1,4 +1,3 @@
-// src/context/CurrencyContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 
@@ -30,9 +29,31 @@ export const CurrencyProvider = ({ children }) => {
     }
   }, [user]);
 
+  const toSubunits = (decimalAmount) => {
+    if (!decimalAmount || isNaN(decimalAmount)) return 0;
+    return Math.round(parseFloat(decimalAmount) * currency.subunitToUnit);
+  };
+
+  const fromSubunits = (subunitAmount) => {
+    if (!subunitAmount || isNaN(subunitAmount)) return 0;
+    return subunitAmount / currency.subunitToUnit;
+  };
+
+  // Add this function before the `value` object
+  const formatMoney = (subunits) => {
+    if (subunits === null || subunits === undefined || isNaN(subunits)) return `${currency.symbol}0.00`;
+    const amount = subunits / currency.subunitToUnit;
+    return `${currency.symbol}${amount.toLocaleString('en-NG', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+  };
+
   const value = {
     currency,
-    setCurrency
+    setCurrency,
+    toSubunits,
+    formatMoney   // ← was missing entirely
   };
 
   return (

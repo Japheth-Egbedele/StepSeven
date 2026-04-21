@@ -19,24 +19,24 @@ const validateCategoryCreate = [
     .withMessage('Category name is required')
     .isLength({ max: 100 })
     .withMessage('Category name cannot exceed 100 characters'),
-  
+
   body('type')
     .trim()
     .notEmpty()
     .withMessage('Category type is required')
     .isIn(['INCOME', 'EXPENSE'])
     .withMessage('Type must be INCOME or EXPENSE'),
-  
+
   body('parent')
     .optional()
     .isMongoId()
     .withMessage('Parent must be a valid ID'),
-  
+
   body('color')
     .optional()
     .matches(/^#[0-9A-F]{6}$/i)
     .withMessage('Color must be a valid hex code'),
-  
+
   handleValidationErrors
 ];
 
@@ -46,22 +46,23 @@ const validateCategoryUpdate = [
     .trim()
     .isLength({ min: 1, max: 100 })
     .withMessage('Category name must be 1-100 characters'),
-  
+
   body('parent')
     .optional()
     .isMongoId()
     .withMessage('Parent must be a valid ID'),
-  
+
   body('color')
     .optional()
     .matches(/^#[0-9A-F]{6}$/i)
     .withMessage('Color must be a valid hex code'),
-  
+
   handleValidationErrors
 ];
 
 // Routes
 categoryRouter.get('/', CategoryController.getAll);
+categoryRouter.post('/defaults', writeLimiter, CategoryController.createDefaults);
 categoryRouter.get('/:id', validateObjectId('id'), CategoryController.getById);
 categoryRouter.post('/', writeLimiter, validateCategoryCreate, CategoryController.create);
 categoryRouter.put('/:id', writeLimiter, validateObjectId('id'), validateCategoryUpdate, CategoryController.update);

@@ -63,6 +63,9 @@ const TransferForm = ({ onSuccess, onCancel }) => {
 
     try {
       const amountKobo = Math.round(parseFloat(amount) * currency.subunitToUnit);
+      if (!Number.isInteger(amountKobo) || amountKobo <= 0) {
+        throw new Error('Enter an amount greater than zero');
+      }
       const transferDate = new Date(date).toISOString();
 
       // 1 — Create the transfer
@@ -77,6 +80,9 @@ const TransferForm = ({ onSuccess, onCancel }) => {
       // 2 — If there's a fee, create a separate expense transaction on the source account
       if (hasFee && feeAmount) {
         const feeKobo = Math.round(parseFloat(feeAmount) * currency.subunitToUnit);
+        if (!Number.isInteger(feeKobo) || feeKobo <= 0) {
+          throw new Error('Enter a fee amount greater than zero');
+        }
         await transactionAPI.createTransaction({
           type: 'EXPENSE',
           amount: feeKobo,

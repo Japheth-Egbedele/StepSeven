@@ -42,13 +42,14 @@ class TransactionController {
       }
 
       // Create transaction
+      const effectiveDate = date || new Date().toISOString();
       const transaction = new Transaction({
         user: userId,
         type,
         amount: amountInSubunits,
         account,
         category,
-        date: date || new Date().toISOString(),
+        date: effectiveDate,
         description,
         notes,
         tags
@@ -63,7 +64,7 @@ class TransactionController {
         await LedgerService.recordExpense(account, transaction.amount, session);
 
         // Update budget spent
-        const periodKey = DateUtils.getMonthlyPeriodKey(new Date(date));
+        const periodKey = DateUtils.getMonthlyPeriodKey(new Date(transaction.date));
         await BudgetService.updateBudgetSpent(userId, category, periodKey);
       }
 

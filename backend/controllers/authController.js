@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const { generateToken, sendTokenResponse } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const CategoryService = require('../services/categoryService');
 
 class AuthController {
   /**
@@ -33,6 +34,9 @@ class AuthController {
           subunitToUnit: 100
         }
       });
+
+      // Create default categories for new user
+      await CategoryService.createDefaultCategories(user._id);
 
       logger.info(`New user registered: ${user.email}`);
       sendTokenResponse(user, 201, res);
@@ -100,13 +104,19 @@ class AuthController {
    */
   static async logout(req, res) {
     try {
-      res.cookie('token', 'none', {
-        expires: new Date(Date.now() + 1000),
-        httpOnly: true
+      const isProduction = process.env.NODE_ENV === 'production';
+
+      // Clear cookie using the same attributes used when setting it.
+      res.cookie('token', '', {
+        expires: new Date(0),
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        path: '/'
       });
 
       logger.info(`User logged out: ${req.user.email}`);
-      
+
       res.json({
         success: true,
         message: 'Logged out successfully'
@@ -148,7 +158,7 @@ class AuthController {
   static async refreshToken(req, res) {
     try {
       const user = await User.findById(req.user.id);
-      
+
       if (!user || !user.isActive) {
         return res.status(401).json({
           success: false,

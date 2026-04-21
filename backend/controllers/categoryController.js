@@ -1,5 +1,7 @@
 const Category = require('../models/Category');
 const logger = require('../utils/logger');
+const CategoryService = require('../services/categoryService');
+
 class CategoryController {
   /**
    * Get all categories for the authenticated user
@@ -24,7 +26,7 @@ class CategoryController {
 
       const hierarchy = parentCategories.map(parent => ({
         ...parent.toObject(),
-        children: childCategories.filter(child => 
+        children: childCategories.filter(child =>
           child.parent && child.parent._id.equals(parent._id)
         )
       }));
@@ -255,6 +257,39 @@ class CategoryController {
       });
     } catch (error) {
       logger.error('Delete category error:', error);
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * Create default categories for user
+   * POST /api/categories/defaults
+   */
+  static async createDefaults(req, res) {
+    try {
+      const userId = req.user.id;
+
+      // Check if user already has categories
+      const hasCategories = await CategoryService.hasCategories(userId);
+      if (hasCategories) {
+        return res.status(400).json({
+          success: false,
+          message: 'User already has categories. Delete them first if you want to recreate defaults.'
+        });
+      }
+
+      const categories = await CategoryService.createDefaultCategories(userId);
+
+      res.status(201).json({
+        success: true,
+        data: categories,
+        message: `Created ${categories.length} default categories`
+      });
+    } catch (error) {
+      logger.error('Create default categories error:', error);
       res.status(400).json({
         success: false,
         message: error.message

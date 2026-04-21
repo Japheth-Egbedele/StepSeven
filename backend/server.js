@@ -21,18 +21,19 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
-const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:3000',
+const allowedOrigins = Array.from(new Set([
+  process.env.CLIENT_URL,
+  ...String(process.env.CLIENT_URLS || '').split(',').map(s => s.trim()).filter(Boolean),
   'https://step-seven-henna.vercel.app',
   'http://localhost:3000',
-  'http://localhost:5173'  // Vite dev server
-];
+  'http://localhost:5173' // Vite dev server
+].filter(Boolean)));
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl, etc)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));

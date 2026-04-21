@@ -24,14 +24,17 @@ const TransactionForm = ({ initialData = null, onSuccess, onCancel }) => {
 
   useEffect(() => {
     fetchCategories();
+    // Prevent invalid state: category must match the current type.
+    setCategory('');
   }, [type]);
 
   const fetchCategories = async () => {
     try {
       const response = await categoryAPI.getAll({ type });
-      setCategories(response.data);
+      const cats = Array.isArray(response) ? response : (response?.data || []);
+      setCategories(cats);
     } catch (err) {
-      console.error('Error fetching categories:', err);
+      setCategories([]);
     }
   };
 
@@ -41,9 +44,14 @@ const TransactionForm = ({ initialData = null, onSuccess, onCancel }) => {
     setLoading(true);
 
     try {
+      const amountSubunits = toSubunits(parseFloat(amount));
+      if (!Number.isInteger(amountSubunits) || amountSubunits <= 0) {
+        throw new Error('Enter an amount greater than zero');
+      }
+
       const transactionData = {
         type,
-        amount: toSubunits(parseFloat(amount)),
+        amount: amountSubunits,
         account,
         category,
         date: new Date(date).toISOString(),
@@ -52,9 +60,9 @@ const TransactionForm = ({ initialData = null, onSuccess, onCancel }) => {
       };
 
       if (initialData) {
-        await transactionAPI.update(initialData._id, transactionData);
+        await transactionAPI.updateTransaction(initialData._id, transactionData);
       } else {
-        await transactionAPI.create(transactionData);
+        await transactionAPI.createTransaction(transactionData);
       }
 
       if (onSuccess) onSuccess();
@@ -105,7 +113,7 @@ const TransactionForm = ({ initialData = null, onSuccess, onCancel }) => {
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.00"
             step="0.01"
-            min="0"
+            min="0.01"
             required
             className="amount-input"
             autoFocus
