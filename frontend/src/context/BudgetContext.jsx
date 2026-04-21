@@ -16,23 +16,41 @@ export const useBudgets = () => {
 export const BudgetProvider = ({ children }) => {
     const { user } = useAuth();
     const [budgets, setBudgets] = useState([]);
+    const getMonthlyPeriodKey = (year, month) => `${year}-${String(month).padStart(2, '0')}`;
+
+    const getWeeklyPeriodKey = (date) => {
+        const d = new Date(date);
+        d.setUTCHours(0, 0, 0, 0);
+        // ISO week-year
+        const thursday = new Date(d);
+        thursday.setUTCDate(thursday.getUTCDate() + 4 - (thursday.getUTCDay() || 7));
+        const isoYear = thursday.getUTCFullYear();
+        const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+        const week = Math.ceil((((thursday - yearStart) / 86400000) + 1) / 7);
+        return `${isoYear}-W${String(week).padStart(2, '0')}`;
+    };
+
+    const now = new Date();
     const [currentPeriod, setCurrentPeriod] = useState({
-        year: new Date().getFullYear(),
-        month: new Date().getMonth() + 1
+        periodType: 'MONTHLY',
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+        cursorDate: now.toISOString(),
+        periodKey: getMonthlyPeriodKey(now.getFullYear(), now.getMonth() + 1)
     });
     const [summary, setSummary] = useState(null);
     const [comparison, setComparison] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const fetchBudgets = useCallback(async (year, month) => {
+    const fetchBudgets = useCallback(async (periodKey) => {
         if (!user) return;
 
         setLoading(true);
         setError(null);
 
         try {
-            const data = await budgetAPI.getBudgets({ year, month });
+            const data = await budgetAPI.getBudgets({ periodKey });
             // ✅ DEFENSIVE: Force array type
             const budgetList = data?.budgets || data?.data || (Array.isArray(data) ? data : []);
             setBudgets(budgetList);
@@ -45,23 +63,21 @@ export const BudgetProvider = ({ children }) => {
         }
     }, [user]);
 
-    const fetchSummary = useCallback(async (year, month) => {
+    const fetchSummary = useCallback(async () => {
         if (!user) return;
 
         try {
-            const data = await budgetAPI.getBudgetSummary(year, month);
-            setSummary(data);
+            setSummary(null);
         } catch (err) {
             console.error('Error fetching budget summary:', err);
         }
     }, [user]);
 
-    const fetchComparison = useCallback(async (year, month) => {
+    const fetchComparison = useCallback(async () => {
         if (!user) return;
 
         try {
-            const data = await budgetAPI.getBudgetComparison(year, month);
-            setComparison(data);
+            setComparison(null);
         } catch (err) {
             console.error('Error fetching budget comparison:', err);
         }
@@ -102,20 +118,38 @@ export const BudgetProvider = ({ children }) => {
     };
 
     const refreshBudgets = useCallback(async () => {
-        const { year, month } = currentPeriod;
+        const { periodKey } = currentPeriod;
         await Promise.all([
-            fetchBudgets(year, month),
-            fetchSummary(year, month),
-            fetchComparison(year, month)
+            fetchBudgets(periodKey),
+            fetchSummary(),
+            fetchComparison()
         ]);
     }, [currentPeriod, fetchBudgets, fetchSummary, fetchComparison]);
 
-    const changePeriod = useCallback((year, month) => {
-        setCurrentPeriod({ year, month });
-        fetchBudgets(year, month);
-        fetchSummary(year, month);
-        fetchComparison(year, month);
-    }, [fetchBudgets, fetchSummary, fetchComparison]);
+    const changePeriod = useCallback((next) => {
+        const periodType = (next?.periodType || currentPeriod.periodType || 'MONTHLY').toUpperCase();
+
+        if (periodType === 'WEEKLY') {
+            const cursorDate = next?.cursorDate || currentPeriod.cursorDate || new Date().toISOString();
+            const periodKey = getWeeklyPeriodKey(cursorDate);
+            const updated = { ...currentPeriod, periodType: 'WEEKLY', cursorDate, periodKey };
+            setCurrentPeriod(updated);
+            fetchBudgets(periodKey);
+            fetchSummary();
+            fetchComparison();
+            return;
+        }
+
+        const year = next?.year ?? currentPeriod.year;
+        const month = next?.month ?? currentPeriod.month;
+        const cursorDate = new Date(Date.UTC(year, month - 1, 1)).toISOString();
+        const periodKey = getMonthlyPeriodKey(year, month);
+        const updated = { ...currentPeriod, periodType: 'MONTHLY', year, month, cursorDate, periodKey };
+        setCurrentPeriod(updated);
+        fetchBudgets(periodKey);
+        fetchSummary();
+        fetchComparison();
+    }, [currentPeriod, fetchBudgets, fetchSummary, fetchComparison]);
 
     const value = {
         budgets,

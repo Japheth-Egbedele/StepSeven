@@ -5,6 +5,7 @@ import { CurrencyProvider } from './context/CurrencyContext';
 import { AccountProvider } from './context/AccountContext';
 import { BudgetProvider } from './context/BudgetContext';
 import { BabyStepProvider } from './context/BabyStepContext'; // Added this
+import { ToastProvider } from './context/ToastContext';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -18,12 +19,14 @@ import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Navbar from './components/Layout/Navbar';
 import Sidebar from './components/Layout/Sidebar';
+import ToastContainer from './components/Layout/ToastContainer';
 import './styles/variables.css';
 import './styles/Global.css';
 
 // Fixed Layout to ensure full-width coverage and no "black void"
 const AppLayout = ({ children }) => (
   <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
+    <ToastContainer />
     <Navbar /> 
     <div style={{ display: 'flex', flex: 1, width: '100%' }}>
       <Sidebar />
@@ -42,13 +45,14 @@ const AppLayout = ({ children }) => (
 
 function App() {
   return (
-    <AuthProvider>
-      <CurrencyProvider>
-        <AccountProvider>
-          <BudgetProvider>
-            <BabyStepProvider> {/* Wrapped inside Providers */}
-              <BrowserRouter>
-                <Routes>
+    <ToastProvider>
+      <AuthProvider>
+        <CurrencyProvider>
+          <AccountProvider>
+            <BudgetProvider>
+              <BabyStepProvider> {/* Wrapped inside Providers */}
+                <BrowserRouter>
+                  <Routes>
                   {/* Public Routes */}
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
@@ -115,13 +119,14 @@ function App() {
                   
                   {/* 404 Route */}
                   <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </BabyStepProvider>
-          </BudgetProvider>
-        </AccountProvider>
-      </CurrencyProvider>
-    </AuthProvider>
+                  </Routes>
+                </BrowserRouter>
+              </BabyStepProvider>
+            </BudgetProvider>
+          </AccountProvider>
+        </CurrencyProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

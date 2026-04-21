@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from '../api/axios';
 import '../styles/Settings.css';
+import { parseMoneyInput, isValidMoneyInput } from '../utils/moneyUtils';
 
 const CURRENCIES = [
   { code: 'NGN', symbol: '₦', name: 'Nigerian Naira', subunitToUnit: 100 },
@@ -30,6 +31,12 @@ const Settings = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
 
+  const [burnRateDaily, setBurnRateDaily] = useState(() => {
+    const subunits = user?.preferences?.burnRateDailySubunits || 0;
+    const unit = user?.currency?.subunitToUnit || 100;
+    return subunits > 0 ? (subunits / unit).toFixed(2) : '';
+  });
+
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -41,6 +48,35 @@ const Settings = () => {
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBurnRateUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ type: '', text: '' });
+
+    try {
+      if (burnRateDaily && !isValidMoneyInput(burnRateDaily)) {
+        throw new Error('Please enter a valid daily burn rate amount');
+      }
+
+      const subunitToUnit = user?.currency?.subunitToUnit || 100;
+      const burnRateDailySubunits = burnRateDaily
+        ? parseMoneyInput(burnRateDaily, subunitToUnit)
+        : 0;
+
+      await axios.put('/users/profile', {
+        preferences: {
+          burnRateDailySubunits
+        }
+      });
+      await refreshUser();
+      setMessage({ type: 'success', text: 'Burn rate updated successfully!' });
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message || 'Failed to update burn rate' });
     } finally {
       setLoading(false);
     }
@@ -153,6 +189,12 @@ const Settings = () => {
             onClick={() => setActiveTab('security')}
           >
             🔒 Security
+          </button>
+          <button
+            className={`tab ${activeTab === 'metrics' ? 'active' : ''}`}
+            onClick={() => setActiveTab('metrics')}
+          >
+            📈 Metrics
           </button>
           <button 
             className={`tab ${activeTab === 'danger' ? 'active' : ''}`}
@@ -278,6 +320,33 @@ const Settings = () => {
 
                 <button type="submit" className="btn-primary" disabled={loading}>
                   {loading ? 'Updating...' : 'Change Password'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Metrics Tab */}
+          {activeTab === 'metrics' && (
+            <div className="settings-section">
+              <h2>Daily Burn Rate</h2>
+              <p className="section-description">
+                This is the amount you typically spend per day. It is used for “Days Ahead” calculations.
+                Leave empty to use auto-calculated values.
+              </p>
+              <form onSubmit={handleBurnRateUpdate}>
+                <div className="form-group">
+                  <label>Daily burn rate</label>
+                  <input
+                    type="text"
+                    value={burnRateDaily}
+                    onChange={(e) => setBurnRateDaily(e.target.value)}
+                    placeholder="0.00"
+                  />
+                  <small>Example: 2500.00</small>
+                </div>
+
+                <button type="submit" className="btn-primary" disabled={loading}>
+                  {loading ? 'Saving...' : 'Save Burn Rate'}
                 </button>
               </form>
             </div>

@@ -392,6 +392,7 @@ class AnalyticsController {
       const { categoryId } = req.query;
 
       const startDate = DateUtils.subWeeks(new Date(), weeks).toISOString();
+      const endDate = new Date().toISOString();
 
       const matchStage = {
         user: userObjectId,

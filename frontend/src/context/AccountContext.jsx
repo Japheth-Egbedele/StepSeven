@@ -89,7 +89,18 @@ export const AccountProvider = ({ children }) => {
     }
   };
 
-  // ... updateAccount and deleteAccount remain similar but use defensive checks
+  const updateAccount = async (id, updates) => {
+    try {
+      const res = await accountAPI.updateAccount(id, updates);
+      const updated = res?.account || res?.data || res;
+      setAccounts(prev => prev.map(acc => (acc._id === id ? updated : acc)));
+      fetchNetWorth();
+      return updated;
+    } catch (err) {
+      throw new Error(err.message || 'Failed to update account');
+    }
+  };
+
   const deleteAccount = async (id) => {
     try {
       await accountAPI.deleteAccount(id);
@@ -107,6 +118,7 @@ export const AccountProvider = ({ children }) => {
     loading,
     error,
     createAccount,
+    updateAccount,
     deleteAccount,
     refreshAccounts
   };

@@ -5,10 +5,12 @@ import { useCurrency } from '../../context/CurrencyContext';
 import { transactionAPI } from '../../api/transactionAPI';
 import { categoryAPI } from '../../api/categoryAPI';
 import '../../styles/components/TransactionForm.css';
+import { useToasts } from '../../context/ToastContext';
 
 const TransactionForm = ({ initialData = null, onSuccess, onCancel }) => {
   const { accounts } = useAccountContext();
   const { toSubunits, currency } = useCurrency();
+  const { pushToast } = useToasts();
 
   const [type, setType] = useState(initialData?.type || 'EXPENSE');
   const [amount, setAmount] = useState(initialData?.amount ? initialData.amount / currency.subunitToUnit : '');
@@ -66,8 +68,10 @@ const TransactionForm = ({ initialData = null, onSuccess, onCancel }) => {
       }
 
       if (onSuccess) onSuccess();
+      pushToast({ type: 'success', title: initialData ? 'Transaction updated' : 'Transaction created' });
     } catch (err) {
       setError(err.message);
+      pushToast({ type: 'error', title: 'Transaction failed', message: err.message || 'Transaction failed' });
     } finally {
       setLoading(false);
     }

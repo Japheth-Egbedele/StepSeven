@@ -56,6 +56,15 @@ const UserSchema = new mongoose.Schema({
       type: String, 
       default: 'DD/MM/YYYY',
       enum: ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD']
+    },
+    burnRateDailySubunits: {
+      type: Number,
+      default: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: 'burnRateDailySubunits must be an integer (stored in subunits)'
+      },
+      min: [0, 'burnRateDailySubunits cannot be negative']
     }
   },
   isActive: {
@@ -116,6 +125,7 @@ UserSchema.methods.getPublicProfile = function () {
     firstName: this.firstName,
     lastName: this.lastName,
     currency: this.currency,
+    preferences: this.preferences,
     createdAt: this.createdAt
   };
 };

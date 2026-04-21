@@ -64,8 +64,12 @@ class TransactionController {
         await LedgerService.recordExpense(account, transaction.amount, session);
 
         // Update budget spent
-        const periodKey = DateUtils.getMonthlyPeriodKey(new Date(transaction.date));
-        await BudgetService.updateBudgetSpent(userId, category, periodKey);
+        const txDate = new Date(transaction.date);
+        const monthlyKey = DateUtils.getMonthlyPeriodKey(txDate);
+        const weeklyKey = DateUtils.getWeeklyPeriodKey(txDate);
+
+        await BudgetService.updateBudgetSpent(userId, category, monthlyKey);
+        await BudgetService.updateBudgetSpent(userId, category, weeklyKey);
       }
 
       await session.commitTransaction();
@@ -80,7 +84,9 @@ class TransactionController {
         data: transaction
       });
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       logger.error('Create transaction error:', error);
       res.status(400).json({
         success: false,
@@ -178,7 +184,9 @@ class TransactionController {
         data: existingTransaction
       });
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       logger.error('Update transaction error:', error);
       res.status(400).json({
         success: false,
@@ -225,7 +233,9 @@ class TransactionController {
         message: 'Transaction deleted successfully'
       });
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       logger.error('Delete transaction error:', error);
       res.status(400).json({
         success: false,

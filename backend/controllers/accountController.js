@@ -102,6 +102,7 @@ class AccountController {
         currency,
         icon,
         color,
+        isEmergencyFund = false,
         creditCardDetails,
         loanDetails,
         notes
@@ -131,6 +132,7 @@ class AccountController {
         currency: currency || req.user.currency.code,
         icon,
         color,
+        isEmergencyFund: !!isEmergencyFund,
         notes
       };
 

@@ -5,11 +5,13 @@ import { transactionAPI } from '../../api/transactionAPI';
 import { categoryAPI } from '../../api/categoryAPI';
 import { useEffect } from 'react';
 import '../../styles/components/TransferForm.css';
+import { useToasts } from '../../context/ToastContext';
 
 
 const TransferForm = ({ onSuccess, onCancel }) => {
   const { accounts } = useAccountContext();
   const { currency } = useCurrency();
+  const { pushToast } = useToasts();
 
   const [fromAccount, setFromAccount] = useState('');
   const [toAccount, setToAccount] = useState('');
@@ -94,8 +96,10 @@ const TransferForm = ({ onSuccess, onCancel }) => {
       }
 
       if (onSuccess) onSuccess();
+      pushToast({ type: 'success', title: 'Transfer complete', message: 'Your transfer was recorded successfully.' });
     } catch (err) {
       setError(err.message || 'Transfer failed');
+      pushToast({ type: 'error', title: 'Transfer failed', message: err.message || 'Transfer failed' });
     } finally {
       setLoading(false);
     }

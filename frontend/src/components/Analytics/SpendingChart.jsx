@@ -16,11 +16,24 @@ const SpendingChart = ({ data, currency }) => {
     );
   }
 
-  const total = data.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const normalized = data.map((item) => ({
+    ...item,
+    amount: item.totalAmount ?? item.amount ?? 0,
+    category: item.categoryName ?? item.category ?? 'Unknown'
+  }));
+
+  const total = normalized.reduce((sum, item) => sum + (item.amount || 0), 0);
+  if (total <= 0) {
+    return (
+      <div className="chart-empty">
+        <p>No spending data available for this period</p>
+      </div>
+    );
+  }
   
   // Calculate percentages and positions for donut chart
   let currentAngle = 0;
-  const segments = data.map((item, idx) => {
+  const segments = normalized.map((item, idx) => {
     const percentage = (item.amount / total) * 100;
     const angle = (item.amount / total) * 360;
     const startAngle = currentAngle;

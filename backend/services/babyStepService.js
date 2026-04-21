@@ -1,6 +1,7 @@
 const Account = require('../models/Account');
 const Transaction = require('../models/Transaction');
 const Progress = require('../models/Progress');
+const User = require('../models/User');
 const DateUtils = require('../utils/dateUtils');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
@@ -130,6 +131,8 @@ class BabyStepService {
   static async getGazelleIntensity(userId) {
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
+    const user = await User.findById(userObjectId).select('preferences.burnRateDailySubunits');
+
     const liquidAccounts = await Account.find({
       user: userObjectId,
       type: 'ASSET',
@@ -160,7 +163,10 @@ class BabyStepService {
 
     // Days Ahead: how long current liquid assets cover daily expenses
     const avgMonthlyExpense = await this.calculateAverageMonthlyExpense(userId);
-    const dailyBurnRate = avgMonthlyExpense > 0 ? avgMonthlyExpense / 30 : 0;
+    const manualDaily = user?.preferences?.burnRateDailySubunits;
+    const dailyBurnRate = (Number.isInteger(manualDaily) && manualDaily > 0)
+      ? manualDaily
+      : (avgMonthlyExpense > 0 ? (avgMonthlyExpense / 30) : 0);
     const daysAhead = dailyBurnRate > 0 ? Math.floor(totalLiquid / dailyBurnRate) : 0;
 
     return {

@@ -30,12 +30,23 @@ class BudgetController {
       const userId = req.user.id;
       const { category, amount, period, periodKey, carryOverEnabled } = req.body;
 
+      const periodUpper = (period || 'MONTHLY').toUpperCase();
+      const amountInSubunits = Math.round(Math.abs(parseFloat(amount)));
+      if (!Number.isInteger(amountInSubunits) || amountInSubunits <= 0) {
+        return res.status(400).json({ success: false, message: 'Amount must be a positive integer (stored in subunits)' });
+      }
+
+      const effectivePeriodKey = periodKey
+        || (periodUpper === 'WEEKLY'
+          ? DateUtils.getWeeklyPeriodKey(new Date())
+          : DateUtils.getMonthlyPeriodKey(new Date()));
+
       const budget = await Budget.create({
         user: userId,
         category,
-        amount: MoneyUtils.parse(amount.toString()),
-        period,
-        periodKey: periodKey || DateUtils.getMonthlyPeriodKey(new Date()),
+        amount: amountInSubunits,
+        period: periodUpper,
+        periodKey: effectivePeriodKey,
         carryOver: {
           enabled: carryOverEnabled !== undefined ? carryOverEnabled : true,
           amount: 0
@@ -58,7 +69,17 @@ class BudgetController {
       const userId = req.user.id;
       const updates = req.body;
 
-      if (updates.amount) updates.amount = MoneyUtils.parse(updates.amount.toString());
+      if (updates.amount !== undefined) {
+        const amountInSubunits = Math.round(Math.abs(parseFloat(updates.amount)));
+        if (!Number.isInteger(amountInSubunits) || amountInSubunits <= 0) {
+          return res.status(400).json({ success: false, message: 'Amount must be a positive integer (stored in subunits)' });
+        }
+        updates.amount = amountInSubunits;
+      }
+
+      if (updates.period) {
+        updates.period = updates.period.toUpperCase();
+      }
 
       const budget = await Budget.findOneAndUpdate(
         { _id: id, user: userId },

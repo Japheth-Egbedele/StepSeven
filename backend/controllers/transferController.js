@@ -20,11 +20,9 @@ class TransferController {
       // Validate amount - frontend already sends kobo/subunits
       const amountInSubunits = Math.round(Math.abs(parseFloat(amount)));
 
-      // Validate both accounts
-      const [sourceAccount, destinationAccount] = await Promise.all([
-        Account.findOne({ _id: fromAccount, user: userId }).session(session),
-        Account.findOne({ _id: toAccount, user: userId }).session(session)
-      ]);
+      // Validate both accounts (sequential within a transaction; do not use Promise.all with the same session)
+      const sourceAccount = await Account.findOne({ _id: fromAccount, user: userId }).session(session);
+      const destinationAccount = await Account.findOne({ _id: toAccount, user: userId }).session(session);
 
       if (!sourceAccount || !destinationAccount) {
         throw new Error('One or both accounts not found or unauthorized');
@@ -67,7 +65,9 @@ class TransferController {
         data: transfer
       });
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       logger.error('Create transfer error:', error);
       res.status(400).json({
         success: false,
@@ -119,10 +119,8 @@ class TransferController {
           throw new Error('Cannot transfer to the same account');
         }
 
-        const [sourceAccount, destinationAccount] = await Promise.all([
-          Account.findOne({ _id: fromAccountId, user: userId }).session(session),
-          Account.findOne({ _id: toAccountId, user: userId }).session(session)
-        ]);
+        const sourceAccount = await Account.findOne({ _id: fromAccountId, user: userId }).session(session);
+        const destinationAccount = await Account.findOne({ _id: toAccountId, user: userId }).session(session);
 
         if (!sourceAccount || !destinationAccount) {
           throw new Error('One or both new accounts not found or unauthorized');
@@ -155,7 +153,9 @@ class TransferController {
         data: existingTransfer
       });
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       logger.error('Update transfer error:', error);
       res.status(400).json({
         success: false,
@@ -203,7 +203,9 @@ class TransferController {
         message: 'Transfer deleted successfully'
       });
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       logger.error('Delete transfer error:', error);
       res.status(400).json({
         success: false,

@@ -45,11 +45,34 @@ class BudgetService {
    * Get period dates from periodKey
    */
   static getPeriodDates(periodKey) {
-    const [year, month] = periodKey.split('-');
-    const startDate = new Date(parseInt(year), parseInt(month) - 1, 1).toISOString();
-    const endDate = DateUtils.endOfMonth(new Date(parseInt(year), parseInt(month) - 1, 1)).toISOString();
-    
-    return { startDate, endDate };
+    // Monthly: YYYY-MM
+    if (/^\d{4}-\d{2}$/.test(periodKey)) {
+      const [year, month] = periodKey.split('-');
+      const startDate = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)).toISOString();
+      const endDate = DateUtils.endOfMonth(new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1))).toISOString();
+      return { startDate, endDate };
+    }
+
+    // Weekly: YYYY-Www (ISO week)
+    const weeklyMatch = /^(\d{4})-W(\d{2})$/.exec(periodKey);
+    if (weeklyMatch) {
+      const isoYear = parseInt(weeklyMatch[1]);
+      const isoWeek = parseInt(weeklyMatch[2]);
+
+      // ISO week 1 is the week containing Jan 4th.
+      const jan4 = new Date(Date.UTC(isoYear, 0, 4));
+      const week1Start = DateUtils.startOfWeek(jan4);
+      const start = new Date(week1Start);
+      start.setUTCDate(start.getUTCDate() + (isoWeek - 1) * 7);
+
+      const end = DateUtils.endOfWeek(start);
+      return { startDate: start.toISOString(), endDate: end.toISOString() };
+    }
+
+    // Fallback: treat unknown keys as current month
+    const now = new Date();
+    const fallbackKey = DateUtils.getMonthlyPeriodKey(now);
+    return this.getPeriodDates(fallbackKey);
   }
 
   /**

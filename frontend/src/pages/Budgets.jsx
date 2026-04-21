@@ -5,10 +5,12 @@ import { useCurrency } from '../context/CurrencyContext';
 import { formatMoney, parseMoneyInput, isValidMoneyInput } from '../utils/moneyUtils';
 import '../styles/Budgets.css';
 import { categoryAPI } from '../api/categoryAPI';
+import { useToasts } from '../context/ToastContext';
 
 const Budgets = () => {
   const { budgets, currentPeriod, summary, comparison, createBudget, updateBudget, deleteBudget, changePeriod, loading } = useBudgets();
   const { currency } = useCurrency();
+  const { pushToast } = useToasts();
 
   const [showModal, setShowModal] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
@@ -27,27 +29,32 @@ const Budgets = () => {
   }, []);
 
   useEffect(() => {
-    changePeriod(currentPeriod.year, currentPeriod.month);
+    changePeriod({ periodType: currentPeriod.periodType, year: currentPeriod.year, month: currentPeriod.month, cursorDate: currentPeriod.cursorDate });
   }, []);
 
   const handlePeriodChange = (direction) => {
-    let { year, month } = currentPeriod;
+    const { cursorDate, periodType } = currentPeriod;
+    const d = new Date(cursorDate);
+    const deltaDays = periodType === 'WEEKLY' ? 7 : 30; // month nav is handled by month/year in context
 
-    if (direction === 'prev') {
-      month--;
-      if (month < 1) {
-        month = 12;
-        year--;
-      }
-    } else {
-      month++;
-      if (month > 12) {
-        month = 1;
-        year++;
-      }
+    if (periodType === 'WEEKLY') {
+      d.setUTCDate(d.getUTCDate() + (direction === 'prev' ? -deltaDays : deltaDays));
+      changePeriod({ cursorDate: d.toISOString(), periodType: 'WEEKLY' });
+      return;
     }
 
-    changePeriod(year, month);
+    // MONTHLY
+    const { year, month } = currentPeriod;
+    let nextYear = year;
+    let nextMonth = month;
+    if (direction === 'prev') {
+      nextMonth--;
+      if (nextMonth < 1) { nextMonth = 12; nextYear--; }
+    } else {
+      nextMonth++;
+      if (nextMonth > 12) { nextMonth = 1; nextYear++; }
+    }
+    changePeriod({ year: nextYear, month: nextMonth, periodType: 'MONTHLY' });
   };
 
   const handleSubmit = async (e) => {
@@ -65,12 +72,30 @@ const Budgets = () => {
     }
 
     try {
+      const getWeeklyPeriodKey = (date) => {
+        const d = new Date(date);
+        d.setUTCHours(0, 0, 0, 0);
+        const thursday = new Date(d);
+        thursday.setUTCDate(thursday.getUTCDate() + 4 - (thursday.getUTCDay() || 7));
+        const isoYear = thursday.getUTCFullYear();
+        const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+        const week = Math.ceil((((thursday - yearStart) / 86400000) + 1) / 7);
+        return `${isoYear}-W${String(week).padStart(2, '0')}`;
+      };
+
+      const now = new Date();
+      const fallbackMonthlyKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
+      const fallbackWeeklyKey = getWeeklyPeriodKey(now);
+
+      const effectivePeriodKey = formData.period === 'WEEKLY'
+        ? (currentPeriod.periodType === 'WEEKLY' ? currentPeriod.periodKey : fallbackWeeklyKey)
+        : (currentPeriod.periodType === 'MONTHLY' ? currentPeriod.periodKey : fallbackMonthlyKey);
+
       const budgetData = {
         category: formData.category.trim(),
         amount: parseMoneyInput(formData.amount, currency.subunitToUnit),
         period: formData.period,
-        year: currentPeriod.year,
-        month: currentPeriod.month
+        periodKey: effectivePeriodKey
       };
 
       if (editingBudget) {
@@ -80,8 +105,10 @@ const Budgets = () => {
       }
 
       handleCloseModal();
+      pushToast({ type: 'success', title: editingBudget ? 'Budget updated' : 'Budget created' });
     } catch (error) {
       setFormError(error.message || 'Failed to save budget');
+      pushToast({ type: 'error', title: 'Budget failed', message: error.message || 'Failed to save budget' });
     }
   };
 
@@ -99,8 +126,9 @@ const Budgets = () => {
     if (!confirm('Delete this budget?')) return;
     try {
       await deleteBudget(budgetId);
+      pushToast({ type: 'success', title: 'Budget deleted' });
     } catch (error) {
-      alert(error.message);
+      pushToast({ type: 'error', title: 'Delete failed', message: error.message || 'Delete failed' });
     }
   };
 
@@ -143,7 +171,7 @@ const Budgets = () => {
     <div className="budgets-page">
       <header className="page-header">
         <div>
-          <h1>Monthly Budgets</h1>
+          <h1>{currentPeriod.periodType === 'WEEKLY' ? 'Weekly Budgets' : 'Monthly Budgets'}</h1>
           <p className="page-subtitle">Envelope-style budgeting for financial control</p>
         </div>
         <button onClick={() => setShowModal(true)} className="btn-primary">
@@ -154,7 +182,19 @@ const Budgets = () => {
       {/* Period Selector */}
       <div className="period-selector">
         <button onClick={() => handlePeriodChange('prev')} className="btn-icon">←</button>
-        <h2>{monthNames[currentPeriod.month - 1]} {currentPeriod.year}</h2>
+        <select
+          value={currentPeriod.periodType}
+          onChange={(e) => changePeriod({ periodType: e.target.value, year: currentPeriod.year, month: currentPeriod.month, cursorDate: currentPeriod.cursorDate })}
+          className="form-select"
+          style={{ maxWidth: 140 }}
+        >
+          <option value="MONTHLY">Monthly</option>
+          <option value="WEEKLY">Weekly</option>
+        </select>
+        {currentPeriod.periodType === 'WEEKLY'
+          ? <h2>{currentPeriod.periodKey}</h2>
+          : <h2>{monthNames[currentPeriod.month - 1]} {currentPeriod.year}</h2>
+        }
         <button onClick={() => handlePeriodChange('next')} className="btn-icon">→</button>
       </div>
 
@@ -290,7 +330,7 @@ const Budgets = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, period: e.target.value }))}
                 >
                   <option value="MONTHLY">Monthly</option>
-                  <option value="YEARLY">Yearly</option>
+                  <option value="WEEKLY">Weekly</option>
                 </select>
               </div>
 

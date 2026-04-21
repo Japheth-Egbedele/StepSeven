@@ -29,9 +29,10 @@ export const BabyStepProvider = ({ children }) => {
         setError(null);
 
         try {
-            const data = await babyStepAPI.getProgress();
-            setProgress(data);
-            setCurrentStep(data?.currentStep || 1);
+            const payload = await babyStepAPI.getProgress();
+            const progressData = payload?.data || payload;
+            setProgress(progressData);
+            setCurrentStep(progressData?.currentStep || 1);
         } catch (err) {
             setError(err.message || 'Failed to fetch progress');
             console.error('Error fetching baby steps progress:', err);
@@ -43,9 +44,9 @@ export const BabyStepProvider = ({ children }) => {
     const fetchEmergencyFund = useCallback(async () => {
         if (!user) return;
         try {
-            const data = await babyStepAPI.getEmergencyFund();
-            // Ensure data has the expected structure, otherwise set a safe default
-            setEmergencyFund(data?.success === false ? null : data);
+            const payload = await babyStepAPI.getEmergencyFund();
+            const emergencyData = payload?.data || payload;
+            setEmergencyFund(payload?.success === false ? null : emergencyData);
         } catch (err) {
             console.error('Error fetching emergency fund:', err);
             setEmergencyFund(null);
@@ -55,13 +56,14 @@ export const BabyStepProvider = ({ children }) => {
     const fetchDebtSnowball = useCallback(async () => {
         if (!user) return;
         try {
-            const data = await babyStepAPI.getDebtSnowball();
+            const payload = await babyStepAPI.getDebtSnowball();
+            const data = payload?.data || payload;
             // Ensure 'debts' is always an array to prevent .map() crashes
             const safeData = {
                 ...data,
                 debts: Array.isArray(data?.debts) ? data.debts : []
             };
-            setDebtSnowball(data?.success === false ? null : safeData);
+            setDebtSnowball(payload?.success === false ? null : safeData);
         } catch (err) {
             console.error('Error fetching debt snowball:', err);
             setDebtSnowball({ debts: [], totalDebt: 0, paidOff: 0 });
@@ -70,7 +72,8 @@ export const BabyStepProvider = ({ children }) => {
 
     const updateProgress = async (progressData) => {
         try {
-            const updated = await babyStepAPI.updateProgress(progressData);
+            const payload = await babyStepAPI.updateProgress(progressData);
+            const updated = payload?.data || payload;
             setProgress(updated);
             setCurrentStep(updated?.currentStep || currentStep);
             return updated;
@@ -81,7 +84,8 @@ export const BabyStepProvider = ({ children }) => {
 
     const completeStep = async (stepNumber) => {
         try {
-            const result = await babyStepAPI.completeStep(stepNumber);
+            const payload = await babyStepAPI.completeStep(stepNumber);
+            const result = payload?.data || payload;
             setProgress(result);
             setCurrentStep(result?.currentStep || stepNumber + 1);
             await refreshAll();

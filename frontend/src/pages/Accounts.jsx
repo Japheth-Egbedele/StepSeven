@@ -4,10 +4,12 @@ import { useAccounts } from '../context/AccountContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { formatMoney, parseMoneyInput, isValidMoneyInput } from '../utils/moneyUtils';
 import '../styles/Accounts.css';
+import { useToasts } from '../context/ToastContext';
 
 const Accounts = () => {
   const { accounts, assets, liabilities, createAccount, updateAccount, deleteAccount, loading } = useAccounts();
   const { currency } = useCurrency();
+  const { pushToast } = useToasts();
 
   const [showModal, setShowModal] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
@@ -37,9 +39,11 @@ const Accounts = () => {
       return;
     }
 
-    if (!isValidMoneyInput(formData.balance)) {
-      setFormError('Please enter a valid balance');
-      return;
+    if (!editingAccount) {
+      if (!isValidMoneyInput(formData.balance)) {
+        setFormError('Please enter a valid balance');
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -49,20 +53,24 @@ const Accounts = () => {
         name: formData.name.trim(),
         type: formData.type,
         subType: formData.subType,
-        balance: parseMoneyInput(formData.balance, currency.subunitToUnit),
         isEmergencyFund: formData.isEmergencyFund,
         description: formData.description.trim()
       };
 
       if (editingAccount) {
+        // Backend disallows direct balance updates; initial balance is only set on create.
         await updateAccount(editingAccount._id, accountData);
+        pushToast({ type: 'success', title: 'Account updated' });
       } else {
+        accountData.balance = parseMoneyInput(formData.balance, currency.subunitToUnit);
         await createAccount(accountData);
+        pushToast({ type: 'success', title: 'Account created' });
       }
 
       handleCloseModal();
     } catch (error) {
       setFormError(error.message || 'Failed to save account');
+      pushToast({ type: 'error', title: 'Account failed', message: error.message || 'Failed to save account' });
     } finally {
       setSubmitting(false);
     }
@@ -87,8 +95,9 @@ const Accounts = () => {
 
     try {
       await deleteAccount(accountId);
+      pushToast({ type: 'success', title: 'Account deleted' });
     } catch (error) {
-      alert(error.message || 'Failed to delete account');
+      pushToast({ type: 'error', title: 'Delete failed', message: error.message || 'Failed to delete account' });
     }
   };
 
