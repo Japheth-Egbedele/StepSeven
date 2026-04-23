@@ -45,3 +45,17 @@
 .sidebar-label {
   font-size: 0.9375rem;
 }
+
+/* Mobile/tablet: hide sidebar and let content fill */
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+/* Mobile/tablet: hide sidebar and let content fill */
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+}

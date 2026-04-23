@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     axios.get('/auth/me')
-      .then(res => setUser(res.data))   // /auth/me returns { success, data: profile }
+      .then((res) => setUser(res?.data || null))   // axios interceptor returns { success, data }
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       const res = await axios.get('/auth/me');
-      setUser(res.data);
+      setUser(res?.data || null);
     } catch {
       // silently fail — user stays as-is
     }

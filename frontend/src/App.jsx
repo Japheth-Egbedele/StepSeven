@@ -25,18 +25,12 @@ import './styles/Global.css';
 
 // Fixed Layout to ensure full-width coverage and no "black void"
 const AppLayout = ({ children }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
+  <div className="app-shell">
     <ToastContainer />
     <Navbar /> 
-    <div style={{ display: 'flex', flex: 1, width: '100%' }}>
+    <div className="app-body">
       <Sidebar />
-      <main style={{ 
-        flex: 1, 
-        padding: '24px', 
-        backgroundColor: '#F9FAFB', 
-        width: '100%',
-        minHeight: 'calc(100vh - 64px)' // Ensures main area fills screen below Navbar
-      }}>
+      <main className="app-main">
         {children}
       </main>
     </div>

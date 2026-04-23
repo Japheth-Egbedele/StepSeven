@@ -102,3 +102,23 @@
 .logout-btn:hover {
   color: #EF4444;
 }
+
+/* Mobile: reduce padding and avoid overflow */
+@media (max-width: 600px) {
+  .navbar-container {
+    padding: 10px 12px;
+  }
+
+  .navbar-brand h1 {
+    font-size: 1.25rem;
+  }
+
+  /* Net worth badge is wide; hide it on small screens */
+  .navbar-center {
+    display: none;
+  }
+
+  .user-info {
+    display: none;
+  }
+}

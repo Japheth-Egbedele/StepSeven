@@ -237,3 +237,18 @@ button:disabled {
   color: #166534;
   line-height: 1.5;
 }
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .auth-form {
+    padding: 20px;
+  }
+
+  .auth-header {
+    padding: 28px 16px;
+  }
+
+  .auth-header h1 {
+    font-size: 2rem;
+  }
+}

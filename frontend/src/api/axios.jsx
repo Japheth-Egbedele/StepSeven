@@ -30,14 +30,14 @@ const instance = axios.create({
 instance.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    if (error.response?.status === 401) {
-      // Don't redirect if already on auth pages
-      const isAuthPage = ['/login', '/register'].includes(window.location.pathname);
-      if (!isAuthPage) {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error.response?.data || { message: 'Network error' });
+    // Avoid hard redirects here (they cause "flash" loops and fight React Router).
+    // Route protection is handled by `ProtectedRoute` + auth state.
+    const payload = error.response?.data;
+    const message =
+      payload?.message ||
+      error.message ||
+      'Network error';
+    return Promise.reject({ ...(payload || {}), message });
   }
 );
 
