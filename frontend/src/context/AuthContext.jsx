@@ -15,19 +15,32 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     axios.get('/auth/me')
-      .then((res) => setUser(res?.data || null))   // axios interceptor returns { success, data }
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+      .then((res) => {
+        const profile = res?.data || null;
+        setUser(profile);
+      })   // axios interceptor returns { success, data }
+      .catch((err) => {
+        setUser(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const login = async (credentials) => {
     const response = await axios.post('/auth/login', credentials);
+    if (response?.token) {
+      try { localStorage.setItem('stepseven_token', response.token); } catch {}
+    }
     setUser(response.user);             // login returns { success, token, user }
     return response;
   };
 
   const register = async (userData) => {
     const response = await axios.post('/auth/register', userData);
+    if (response?.token) {
+      try { localStorage.setItem('stepseven_token', response.token); } catch {}
+    }
     setUser(response.user);
     return response;
   };
@@ -38,6 +51,7 @@ export const AuthProvider = ({ children }) => {
     } catch {
       // clear local state regardless
     } finally {
+      try { localStorage.removeItem('stepseven_token'); } catch {}
       setUser(null);
     }
   };

@@ -37,11 +37,13 @@ body {
 @media (max-width: 900px) {
   .app-main {
     padding: 16px;
+    padding-bottom: 88px; /* room for mobile bottom nav */
   }
 }
 
 @media (max-width: 600px) {
   .app-main {
     padding: 12px;
+    padding-bottom: 88px; /* room for mobile bottom nav */
   }
 }

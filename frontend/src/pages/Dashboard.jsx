@@ -10,7 +10,7 @@ import '../styles/Dashboard.css';
 const DAILY_LIMIT_KOBO = 500000; // ₦5,000 in kobo — wants alert threshold
 
 const Dashboard = () => {
-  const { netWorth, totalAssets, totalLiabilities, accounts, loading: accountsLoading } = useAccounts();
+  const { netWorth, totalAssets, totalLiabilities, accounts, loading: accountsLoading, error: accountsError } = useAccounts();
   const { currency } = useCurrency();
 
   const [recentTransactions, setRecentTransactions] = useState([]);
@@ -109,6 +109,18 @@ const Dashboard = () => {
         <h1>Dashboard</h1>
         <p className="dashboard-subtitle">Your financial command center</p>
       </header>
+
+      {accountsError && (
+        <div className="spending-alert" role="status">
+          <span className="alert-icon">⚠️</span>
+          <div className="alert-content">
+            <strong>Can’t load your data</strong>
+            <p>
+              {accountsError}. If you’re on mobile, this is usually an authentication/cookie issue — try logging out and back in.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Spending Leak Alert ── */}
       {spendingAlert && (

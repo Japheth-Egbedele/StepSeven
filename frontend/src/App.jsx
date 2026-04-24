@@ -19,6 +19,7 @@ import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Navbar from './components/Layout/Navbar';
 import Sidebar from './components/Layout/Sidebar';
+import MobileNav from './components/Layout/MobileNav';
 import ToastContainer from './components/Layout/ToastContainer';
 import './styles/variables.css';
 import './styles/Global.css';
@@ -34,6 +35,7 @@ const AppLayout = ({ children }) => (
         {children}
       </main>
     </div>
+    <MobileNav />
   </div>
 );
 

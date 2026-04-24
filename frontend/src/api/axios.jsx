@@ -25,7 +25,20 @@ const instance = axios.create({
   }
 });
 
-// No request interceptor needed — cookie is attached by the browser automatically
+// Bearer-token fallback for mobile browsers that block cross-site cookies.
+// Cookie auth still works when available; the Authorization header is only added if a token exists.
+instance.interceptors.request.use((config) => {
+  try {
+    const token = window?.localStorage?.getItem('stepseven_token');
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch {
+    // ignore storage errors (private mode, blocked storage, etc.)
+  }
+  return config;
+});
 
 instance.interceptors.response.use(
   (response) => response.data,
