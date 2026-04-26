@@ -1,18 +1,37 @@
-# StepSeven
+# StepSeven: Financial Command Center
 
-Nigerian-focused budgeting + cashflow tracking with Dave Ramsey’s Baby Steps built in.
+StepSeven is a Nigerian-focused budgeting and cashflow tracker that helps you manage accounts, log transactions, and follow Dave Ramsey-style Baby Steps in one place. It matters because most finance tools don’t fit Nigerian realities (naira-first workflows, local banking patterns, and day-to-day cash movement), which makes consistent tracking harder than it should be.
 
-## Daily workflow (how you’ll use it)
-- **Create accounts** (Cash, Bank, etc) and enter your **starting balances**.
-- **Create transactions daily** (income/expense) and optional **transfers** between accounts.
-- Use **filters + analytics** to review spending and progress.
+## The Problem
+Most budgeting apps assume US-centric banking rails and budgeting habits, so Nigerian users end up fighting the tool (currency handling, account structure, and cash-heavy workflows) instead of getting clarity. That friction leads to incomplete data, inaccurate insights, and missed progress signals.
 
-## Tech stack
-- **Backend**: Node.js + Express + MongoDB (Mongoose)
-- **Frontend**: React (Vite) + React Router + Context + Axios
-- **Auth**: JWT stored in **HTTP-only cookie**
+## The Solution
+StepSeven provides a naira-first “command center” for accounts and transactions, with Baby Steps progress and analytics built on top of your real balances. It’s designed to make daily money tracking fast, accurate, and actionable—so you can see where your money is going and how far ahead you are.
 
-## Quick start (local dev)
+**Tech Stack:** Node.js, Express, MongoDB (Mongoose), React (Vite), React Router, Context API, Axios
+
+## Key Features
+- Accounts (Cash/Bank/etc) with starting balances and an Emergency Fund flag for Baby Steps tracking
+- Income/Expense transactions plus transfers between accounts
+- Baby Steps progress + “Days Ahead” metric (liquid assets vs burn rate)
+- Analytics and category breakdowns for monthly spending insights
+- Cookie-based auth (JWT in HTTP-only cookies) for a smoother web experience
+
+## Live Demo / Screenshots
+<p>
+  <img src="frontend/src/assets/image1.png" width="900" />
+</p>
+<p>
+  <img src="frontend/src/assets/image2.png" width="900" />
+</p>
+<p>
+  <img src="frontend/src/assets/image3.png" width="900" />
+</p>
+<p>
+  <img src="frontend/src/assets/image4.png" width="900" />
+</p>
+
+## Setup / Installation
 
 ### Prereqs
 - Node.js 18+
@@ -53,7 +72,7 @@ cd frontend
 npm install
 ```
 
-Create `frontend/.env.development` (or use the existing one):
+Create `frontend/.env.development`:
 
 ```env
 VITE_API_URL=http://localhost:5000
@@ -70,17 +89,20 @@ Open `http://localhost:5173`.
 ## Deployment (Vercel frontend + Render backend)
 
 ### Backend env (Render)
-- **`NODE_ENV=production`**
-- **`MONGO_URI=...`**
-- **`JWT_SECRET=...`**
-- **`CLIENT_URL=https://<your-vercel-app>.vercel.app`**
+- `NODE_ENV=production`
+- `MONGO_URI=...`
+- `JWT_SECRET=...`
+- `CLIENT_URL=https://<your-vercel-app>.vercel.app`
 
 ### Frontend env (Vercel)
-- **`VITE_API_URL=https://<your-render-service>.onrender.com`**
+- `VITE_API_URL=https://<your-render-service>.onrender.com`
 
 Notes:
-- The frontend app automatically normalizes `VITE_API_URL` to target `.../api` (so both `https://host` and `https://host/api` work).
-- Auth uses an HTTP-only cookie. In production the API sets cookie attributes compatible with cross-site requests (`SameSite=None; Secure`).
+- The frontend normalizes `VITE_API_URL` to target `.../api` (so both `https://host` and `https://host/api` work).
+- Auth uses an HTTP-only cookie; in production the API sets cookie attributes compatible with cross-site requests (`SameSite=None; Secure`).
+
+## Status
+In active development.
 
 ## Troubleshooting
 - **404 calling `/auth/me`**: your frontend is hitting the API without `/api` in the base URL. Ensure `VITE_API_URL` is set correctly.
