@@ -92,6 +92,21 @@ const Dashboard = () => {
     return { color: '#EF4444', label: 'Critical' };
   };
 
+  const getBurnRateLabel = (daysData) => {
+    const timeframe = daysData?.burnRateTimeframe || 'daily';
+    if (timeframe === 'weekly') return 'week';
+    if (timeframe === 'monthly') return 'month';
+    return 'day';
+  };
+
+  const getBurnRateForLabel = (daysData) => {
+    const perDay = Number(daysData?.dailyBurnRate) || 0;
+    const timeframe = daysData?.burnRateTimeframe || 'daily';
+    if (timeframe === 'weekly') return Math.round(perDay * 7);
+    if (timeframe === 'monthly') return Math.round(perDay * 30);
+    return Math.round(perDay);
+  };
+
   if (accountsLoading) {
     return (
       <div className="dashboard-loading">
@@ -155,7 +170,12 @@ const Dashboard = () => {
                 {daysStatus.label}
               </div>
               <div className="days-ahead-sub">
-                Burn rate: {formatMoney(daysAhead.dailyBurnRate, currency.symbol, currency.subunitToUnit)}/day
+                Burn rate: {formatMoney(getBurnRateForLabel(daysAhead), currency.symbol, currency.subunitToUnit)}/{getBurnRateLabel(daysAhead)}
+                {daysAhead?.burnRateTimeframe && daysAhead.burnRateTimeframe !== 'daily' && (
+                  <span style={{ opacity: 0.8 }}>
+                    {' '}(≈ {formatMoney(daysAhead.dailyBurnRate, currency.symbol, currency.subunitToUnit)}/day)
+                  </span>
+                )}
               </div>
             </>
           ) : (

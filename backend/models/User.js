@@ -65,6 +65,29 @@ const UserSchema = new mongoose.Schema({
         message: 'burnRateDailySubunits must be an integer (stored in subunits)'
       },
       min: [0, 'burnRateDailySubunits cannot be negative']
+    },
+    burnRateWeeklySubunits: {
+      type: Number,
+      default: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: 'burnRateWeeklySubunits must be an integer (stored in subunits)'
+      },
+      min: [0, 'burnRateWeeklySubunits cannot be negative']
+    },
+    burnRateMonthlySubunits: {
+      type: Number,
+      default: 0,
+      validate: {
+        validator: Number.isInteger,
+        message: 'burnRateMonthlySubunits must be an integer (stored in subunits)'
+      },
+      min: [0, 'burnRateMonthlySubunits cannot be negative']
+    },
+    burnRateTimeframe: {
+      type: String,
+      default: 'daily',
+      enum: ['daily', 'weekly', 'monthly']
     }
   },
   isActive: {

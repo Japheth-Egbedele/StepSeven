@@ -24,8 +24,11 @@ const BabyStepDashboard = () => {
         babyStepAPI.getProgress(),
         babyStepAPI.getGazelleIntensity()
       ]);
-      setProgress(progressRes.data);
-      setGazelleIntensity(gazelleRes.data);
+      // Axios response shape: { data: { success, data } }
+      const progressData = progressRes?.data?.data ?? progressRes?.data ?? null;
+      const gazelleData = gazelleRes?.data?.data ?? gazelleRes?.data ?? null;
+      setProgress(progressData);
+      setGazelleIntensity(gazelleData);
     } catch (error) {
       console.error('Error fetching Baby Steps data:', error);
     } finally {

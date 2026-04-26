@@ -8,9 +8,10 @@ const GazelleIntensityWidget = ({ data }) => {
 
   const handleThrowAtDebt = async () => {
     try {
-      const smallestDebt = await babyStepAPI.getSmallestDebt();
-      if (smallestDebt.data) {
-        alert(`Throw ${formatMoney(data.unallocated)} at ${smallestDebt.data.name}!`);
+      const res = await babyStepAPI.getSmallestDebt();
+      const smallestDebt = res?.data?.data ?? null;
+      if (smallestDebt) {
+        alert(`Throw ${formatMoney(data.unallocated)} at ${smallestDebt.name}!`);
         // Navigate to payment screen or open payment modal
       }
     } catch (error) {

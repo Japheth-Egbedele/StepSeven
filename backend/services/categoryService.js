@@ -9,6 +9,7 @@ const DEFAULT_CATEGORIES = {
     { name: 'Salary', icon: '💰', color: '#4CAF50' },
     { name: 'Freelance', icon: '💻', color: '#8BC34A' },
     { name: 'Investments', icon: '📈', color: '#009688' },
+    { name: 'Allowance', icon: '🧾', color: '#26A69A' },
     { name: 'Gifts', icon: '🎁', color: '#00BCD4' },
     { name: 'Other Income', icon: '💵', color: '#03A9F4' }
   ],
@@ -17,11 +18,14 @@ const DEFAULT_CATEGORIES = {
     { name: 'Transportation', icon: '🚗', color: '#FF9800' },
     { name: 'Housing', icon: '🏠', color: '#795548' },
     { name: 'Utilities', icon: '💡', color: '#FFC107' },
+    { name: 'Internet', icon: '🌐', color: '#00BCD4' },
     { name: 'Healthcare', icon: '🏥', color: '#E91E63' },
     { name: 'Entertainment', icon: '🎬', color: '#9C27B0' },
+    { name: 'Wants', icon: '✨', color: '#F06292' },
     { name: 'Shopping', icon: '🛍️', color: '#673AB7' },
     { name: 'Education', icon: '📚', color: '#3F51B5' },
     { name: 'Personal Care', icon: '✂️', color: '#2196F3' },
+    { name: 'Tithes', icon: '🙏', color: '#8D6E63' },
     { name: 'Bank Charges', icon: '🏦', color: '#607D8B' },
     { name: 'Other', icon: '📦', color: '#9E9E9E' }
   ]

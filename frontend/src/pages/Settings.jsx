@@ -37,6 +37,22 @@ const Settings = () => {
     return subunits > 0 ? (subunits / unit).toFixed(2) : '';
   });
 
+  const [burnRateWeekly, setBurnRateWeekly] = useState(() => {
+    const subunits = user?.preferences?.burnRateWeeklySubunits || 0;
+    const unit = user?.currency?.subunitToUnit || 100;
+    return subunits > 0 ? (subunits / unit).toFixed(2) : '';
+  });
+
+  const [burnRateMonthly, setBurnRateMonthly] = useState(() => {
+    const subunits = user?.preferences?.burnRateMonthlySubunits || 0;
+    const unit = user?.currency?.subunitToUnit || 100;
+    return subunits > 0 ? (subunits / unit).toFixed(2) : '';
+  });
+
+  const [burnRateTimeframe, setBurnRateTimeframe] = useState(() => {
+    return user?.preferences?.burnRateTimeframe || 'daily';
+  });
+
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -62,15 +78,30 @@ const Settings = () => {
       if (burnRateDaily && !isValidMoneyInput(burnRateDaily)) {
         throw new Error('Please enter a valid daily burn rate amount');
       }
+      if (burnRateWeekly && !isValidMoneyInput(burnRateWeekly)) {
+        throw new Error('Please enter a valid weekly burn rate amount');
+      }
+      if (burnRateMonthly && !isValidMoneyInput(burnRateMonthly)) {
+        throw new Error('Please enter a valid monthly burn rate amount');
+      }
 
       const subunitToUnit = user?.currency?.subunitToUnit || 100;
       const burnRateDailySubunits = burnRateDaily
         ? parseMoneyInput(burnRateDaily, subunitToUnit)
         : 0;
+      const burnRateWeeklySubunits = burnRateWeekly
+        ? parseMoneyInput(burnRateWeekly, subunitToUnit)
+        : 0;
+      const burnRateMonthlySubunits = burnRateMonthly
+        ? parseMoneyInput(burnRateMonthly, subunitToUnit)
+        : 0;
 
       await axios.put('/users/profile', {
         preferences: {
-          burnRateDailySubunits
+          burnRateDailySubunits,
+          burnRateWeeklySubunits,
+          burnRateMonthlySubunits,
+          burnRateTimeframe
         }
       });
       await refreshUser();
@@ -328,12 +359,24 @@ const Settings = () => {
           {/* Metrics Tab */}
           {activeTab === 'metrics' && (
             <div className="settings-section">
-              <h2>Daily Burn Rate</h2>
+              <h2>Burn Rate</h2>
               <p className="section-description">
-                This is the amount you typically spend per day. It is used for “Days Ahead” calculations.
-                Leave empty to use auto-calculated values.
+                Set custom burn rates (daily/weekly/monthly) and choose which one drives “Days Ahead”.
+                Leave amounts empty to use auto-calculated values.
               </p>
               <form onSubmit={handleBurnRateUpdate}>
+                <div className="form-group">
+                  <label>Use for Days Ahead</label>
+                  <select
+                    value={burnRateTimeframe}
+                    onChange={(e) => setBurnRateTimeframe(e.target.value)}
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+
                 <div className="form-group">
                   <label>Daily burn rate</label>
                   <input
@@ -343,6 +386,26 @@ const Settings = () => {
                     placeholder="0.00"
                   />
                   <small>Example: 2500.00</small>
+                </div>
+
+                <div className="form-group">
+                  <label>Weekly burn rate</label>
+                  <input
+                    type="text"
+                    value={burnRateWeekly}
+                    onChange={(e) => setBurnRateWeekly(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Monthly burn rate</label>
+                  <input
+                    type="text"
+                    value={burnRateMonthly}
+                    onChange={(e) => setBurnRateMonthly(e.target.value)}
+                    placeholder="0.00"
+                  />
                 </div>
 
                 <button type="submit" className="btn-primary" disabled={loading}>

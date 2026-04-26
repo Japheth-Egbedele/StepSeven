@@ -131,7 +131,9 @@ class BabyStepService {
   static async getGazelleIntensity(userId) {
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    const user = await User.findById(userObjectId).select('preferences.burnRateDailySubunits');
+    const user = await User.findById(userObjectId).select(
+      'preferences.burnRateDailySubunits preferences.burnRateWeeklySubunits preferences.burnRateMonthlySubunits preferences.burnRateTimeframe'
+    );
 
     const liquidAccounts = await Account.find({
       user: userObjectId,
@@ -163,10 +165,27 @@ class BabyStepService {
 
     // Days Ahead: how long current liquid assets cover daily expenses
     const avgMonthlyExpense = await this.calculateAverageMonthlyExpense(userId);
-    const manualDaily = user?.preferences?.burnRateDailySubunits;
-    const dailyBurnRate = (Number.isInteger(manualDaily) && manualDaily > 0)
-      ? manualDaily
-      : (avgMonthlyExpense > 0 ? (avgMonthlyExpense / 30) : 0);
+    const prefs = user?.preferences || {};
+    const timeframe = (prefs.burnRateTimeframe || 'daily');
+
+    const manualDaily = prefs.burnRateDailySubunits;
+    const manualWeekly = prefs.burnRateWeeklySubunits;
+    const manualMonthly = prefs.burnRateMonthlySubunits;
+
+    const resolveDailyBurnRate = () => {
+      if (timeframe === 'weekly' && Number.isInteger(manualWeekly) && manualWeekly > 0) {
+        return manualWeekly / 7;
+      }
+      if (timeframe === 'monthly' && Number.isInteger(manualMonthly) && manualMonthly > 0) {
+        return manualMonthly / 30;
+      }
+      if (Number.isInteger(manualDaily) && manualDaily > 0) {
+        return manualDaily;
+      }
+      return (avgMonthlyExpense > 0 ? (avgMonthlyExpense / 30) : 0);
+    };
+
+    const dailyBurnRate = resolveDailyBurnRate();
     const daysAhead = dailyBurnRate > 0 ? Math.floor(totalLiquid / dailyBurnRate) : 0;
 
     return {
@@ -177,6 +196,7 @@ class BabyStepService {
       avgMonthlyExpense,
       dailyBurnRate: Math.round(dailyBurnRate),
       daysAhead,
+      burnRateTimeframe: timeframe,
       shouldThrowAtDebt: unallocated > 0
     };
   }

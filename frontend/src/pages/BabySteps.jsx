@@ -1,5 +1,7 @@
 // src/pages/BabySteps.jsx
+import { useMemo, useState } from 'react';
 import { useBabySteps } from '../context/BabyStepContext';
+import { useAccounts } from '../context/AccountContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { formatMoney } from '../utils/moneyUtils';
 import '../styles/BabySteps.css';
@@ -16,6 +18,7 @@ const BABY_STEPS = [
 
 const BabySteps = () => {
   const { currency } = useCurrency();
+  const { accounts, updateAccount, refreshAccounts } = useAccounts();
   const { 
     currentStep, 
     emergencyFund, 
@@ -26,6 +29,45 @@ const BabySteps = () => {
     isStepCompleted,
     isStepCurrent
   } = useBabySteps();
+
+  const eligibleEmergencyAccounts = useMemo(() => {
+    return (Array.isArray(accounts) ? accounts : [])
+      .filter(acc =>
+        acc.isActive !== false &&
+        acc.type === 'ASSET' &&
+        (acc.subType === 'BANK' || acc.subType === 'CASH')
+      )
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [accounts]);
+
+  const currentEmergencyAccountId = useMemo(() => {
+    const current = eligibleEmergencyAccounts.find(a => a.isEmergencyFund === true);
+    return current?._id || '';
+  }, [eligibleEmergencyAccounts]);
+
+  const [emergencyAccountId, setEmergencyAccountId] = useState('');
+  const [savingEmergencyAccount, setSavingEmergencyAccount] = useState(false);
+
+  const saveEmergencyFundAccount = async () => {
+    if (!emergencyAccountId) return;
+    setSavingEmergencyAccount(true);
+    try {
+      const updates = [];
+      for (const acc of eligibleEmergencyAccounts) {
+        const shouldBeEmergency = acc._id === emergencyAccountId;
+        if ((acc.isEmergencyFund === true) !== shouldBeEmergency) {
+          updates.push(updateAccount(acc._id, { isEmergencyFund: shouldBeEmergency }));
+        }
+      }
+      await Promise.all(updates);
+      await refreshAccounts();
+      alert('Emergency fund account updated.');
+    } catch (error) {
+      alert(error.message || 'Failed to update emergency fund account');
+    } finally {
+      setSavingEmergencyAccount(false);
+    }
+  };
 
   const handleCompleteStep = async (stepNumber) => {
     if (!confirm(`Mark Baby Step ${stepNumber} as complete?`)) return;
@@ -151,6 +193,37 @@ const BabySteps = () => {
           <p className="page-subtitle">Your path to financial freedom - Dave Ramsey's proven plan</p>
         </div>
       </header>
+
+      {/* BabySteps settings */}
+      {eligibleEmergencyAccounts.length > 0 && (
+        <div className="motivation-card" style={{ marginTop: 0 }}>
+          <h3>🏦 BabySteps Account</h3>
+          <p>
+            Choose which account counts as your Emergency Fund for Baby Step tracking.
+          </p>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+            <select
+              value={emergencyAccountId || currentEmergencyAccountId}
+              onChange={(e) => setEmergencyAccountId(e.target.value)}
+              style={{ padding: '10px 12px', borderRadius: 10 }}
+            >
+              <option value="" disabled>Select an account</option>
+              {eligibleEmergencyAccounts.map(acc => (
+                <option key={acc._id} value={acc._id}>
+                  {acc.name}{acc.isEmergencyFund ? ' (current)' : ''}
+                </option>
+              ))}
+            </select>
+            <button
+              className="btn-complete-step"
+              onClick={saveEmergencyFundAccount}
+              disabled={savingEmergencyAccount || !(emergencyAccountId && emergencyAccountId !== currentEmergencyAccountId)}
+            >
+              {savingEmergencyAccount ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Progress Overview */}
       <div className="journey-progress">

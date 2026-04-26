@@ -181,7 +181,8 @@ class BabyStepController {
           daysAhead: metrics.daysAhead,
           totalLiquid: metrics.totalLiquid,
           dailyBurnRate: metrics.dailyBurnRate,
-          avgMonthlyExpense: metrics.avgMonthlyExpense
+          avgMonthlyExpense: metrics.avgMonthlyExpense,
+          burnRateTimeframe: metrics.burnRateTimeframe || 'daily'
         }
       });
     } catch (error) {
